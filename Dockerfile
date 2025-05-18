@@ -11,20 +11,39 @@ RUN echo $TZ > /etc/timezone && \
 RUN apt update && \
     apt install -y \
     php php-cli php-curl \
-    php-dev php-pear \  
+    php-dev php-pear \
+    php-dom \
+    php-mbstring \
+    php-xml \
+    php-zip \
+    php-bcmath \
+    php-gd \
+    php-intl \
+    php-soap \
+    php-opcache \
+    php-tokenizer \
+    php-xmlwriter \
+    php-ctype \
+    php-iconv \
+    php-json \
+    php-simplexml \
+    php-posix \
     nginx \
     supervisor \
     curl \
     git \
     libcurl4 \
+    libssl-dev \
     libbrotli-dev \
-    libssl-dev && \
+    unzip \
+    zip && \
     rm -rf /var/lib/apt/lists/*
 
 # 安装 Swoole 扩展
 RUN pecl install swoole && \
     echo "extension=swoole.so" > /etc/php/8.1/cli/conf.d/20-swoole.ini
-
+# 增加 PHP 内存限制
+RUN echo "memory_limit = 2G" > /etc/php/8.1/cli/conf.d/99-custom.ini
 # 设置工作目录
 WORKDIR /usr/src/app
 
