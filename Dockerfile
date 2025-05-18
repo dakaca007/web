@@ -23,7 +23,7 @@ WORKDIR /app
 
 # 复制代码
 COPY ./terminal.sh /app
-COPY ./terminal.sh /user/bin
+COPY ./terminal.sh /usr/bin/
 COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
