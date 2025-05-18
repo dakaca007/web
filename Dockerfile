@@ -22,10 +22,9 @@ ENV PATH="$PATH:/root/go/bin"
 WORKDIR /app
 
 # 复制代码
-COPY ./terminal.sh /app
-COPY ./terminal.sh /usr/bin/
-RUN chmod +x /app/terminal.sh
-RUN chmod +x /usr/bin/terminal.sh
+COPY ./terminal.sh /app/terminal.sh
+COPY ./terminal.sh /usr/bin/terminal.sh
+RUN chmod +x /app/terminal.sh /usr/bin/terminal.sh
 COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
