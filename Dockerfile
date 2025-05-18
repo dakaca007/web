@@ -14,7 +14,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
 
 # 下载并安装 Go
 # 修正了 Go 下载链接
-RUN wget https/go.dev/dl/go1.21.1.linux-amd64.tar.gz -O go.tar.gz \
+RUN wget https://go.dev/dl/go1.21.1.linux-amd64.tar.gz -O go.tar.gz \
     && tar -C /usr/local -xzf go.tar.gz \
     && rm go.tar.gz
 
