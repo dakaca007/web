@@ -29,12 +29,7 @@ RUN ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
 # 配置 Supervisord
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# 安装 Composer（可选）
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-# 安装 PHP 依赖（可选）
-RUN composer install --no-dev --optimize-autoloader
-
+ 
 # 暴露 80 端口
 EXPOSE 80
 
