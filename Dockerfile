@@ -12,18 +12,24 @@ RUN apt update && apt install -y \
     nginx supervisor wget unzip \
     npm git golang \
     && rm -rf /var/lib/apt/lists/*
-
+# 配置 MySQL 数据目录
+RUN mkdir -p /var/lib/mysql /var/run/mysqld && \
+    chown -R mysql:mysql /var/lib/mysql /var/run/mysqld
 # 配置 MySQL
 RUN mkdir -p /var/run/mysqld && chown -R mysql:mysql /var/run/mysqld
 COPY ./sql/init.sql /docker-entrypoint-initdb.d/
 RUN chmod +r /docker-entrypoint-initdb.d/init.sql 
 ENV MYSQL_ROOT_PASSWORD=render123
 ENV MYSQL_DATABASE=myapp
-# 在安装 MySQL 后添加以下步骤
-RUN mysqld --initialize-insecure --user=mysql && \
-    service mysql start && \
-    mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;" && \
-    mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE < /docker-entrypoint-initdb.d/init.sql && \
+# 初始化 MySQL
+RUN mysqld --initialize-insecure --user=mysql --skip-test-db
+# 启动服务并执行初始化
+RUN service mysql start && \
+    mysql -uroot -e \
+      "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASSWORD'; \
+      CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE; \
+      USE $MYSQL_DATABASE; \
+      SOURCE /docker-entrypoint-initdb.d/init.sql;" && \
     service mysql stop
 # 安装 Adminer（数据库管理）
 RUN mkdir -p /var/www/adminer && \
