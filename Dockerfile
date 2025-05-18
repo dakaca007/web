@@ -10,7 +10,6 @@ RUN echo $TZ > /etc/timezone && \
 
 # 安装核心依赖（包含编译工具）
 RUN apt update && \
-    zlib1g-dev libcurl4-openssl-dev \
     apt install -y \
     php php-cli php-curl \
     php-dev php-pear \
@@ -21,6 +20,7 @@ RUN apt update && \
     supervisor \
     curl git \
     libcurl4 libssl-dev libbrotli-dev \
+    zlib1g-dev libcurl4-openssl-dev \
     g++ make autoconf \  
     unzip \
     zip && \
