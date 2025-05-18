@@ -8,11 +8,12 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # 安装系统依赖
 RUN apt update && apt install -y \
     python3 python3-pip python3-venv \
-    mysql-client \
+    mysql-server mysql-client \
     nginx supervisor wget unzip \
     npm git golang \
     && rm -rf /var/lib/apt/lists/*
 
+ 
 # 安装 Gotty（Web 终端）
 RUN go install github.com/sorenisanerd/gotty@latest
 ENV PATH="$PATH:/root/go/bin"
@@ -20,10 +21,9 @@ ENV PATH="$PATH:/root/go/bin"
 # 配置 Python 环境
 WORKDIR /app
 
-
 # 复制代码
-
-COPY ./terminal.sh /usr/bin/
+COPY ./app /app
+COPY ./terminal.sh /user/bin/
 COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
