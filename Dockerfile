@@ -10,24 +10,30 @@ RUN apt update && apt install -y \
     python3 python3-pip python3-venv \
     mysql-client \
     nginx supervisor wget unzip \
-    npm git golang \
+    npm git golang gettext \
     && rm -rf /var/lib/apt/lists/*
+
+# 安装最新版 Go
+RUN wget https://go.dev/dl/go1.21.1.linux-amd64.tar.gz \
+    && tar -C /usr/local -xzf go1.21.1.linux-amd64.tar.gz \
+    && rm go1.21.1.linux-amd64.tar.gz
+ENV PATH="$PATH:/usr/local/go/bin"
 
 # 安装 Gotty（Web 终端）
 RUN go install github.com/sorenisanerd/gotty@latest
 ENV PATH="$PATH:/root/go/bin"
-
 
 # 复制代码
 WORKDIR /app
 COPY ./terminal.sh /app
 COPY ./terminal.sh /usr/bin/
 RUN chmod +x /usr/bin/terminal.sh
-COPY ./nginx.conf /etc/nginx/nginx.conf
+COPY ./nginx.conf.template /etc/nginx/templates/
 COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # 暴露端口 (Render 使用环境变量 PORT)
-EXPOSE 80
+ENV PORT=80
+EXPOSE $PORT
 
 # 启动服务
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["sh", "-c", "envsubst '$PORT' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/nginx.conf && /usr/bin/supervisord -n"]
