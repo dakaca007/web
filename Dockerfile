@@ -28,7 +28,7 @@ WORKDIR /app
 COPY ./terminal.sh /app
 COPY ./terminal.sh /usr/bin/
 RUN chmod +x /usr/bin/terminal.sh
-COPY ./nginx.conf.template /etc/nginx/templates/
+COPY ./nginx.conf /etc/nginx/templates/
 COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # 暴露端口 (Render 使用环境变量 PORT)
