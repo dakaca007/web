@@ -1,7 +1,4 @@
 #!/bin/bash
-
-# 可选：自定义欢迎信息
-echo "欢迎使用 Web 终端！"
-
-# 启动交互式 Shell
+echo "Web Terminal Started!"
+# 使用 exec 替换当前 shell 进程为 /bin/bash
 exec /bin/bash
