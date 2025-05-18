@@ -8,32 +8,10 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # 安装系统依赖
 RUN apt update && apt install -y \
     python3 python3-pip python3-venv \
-    mysql-server mysql-client \
+    mysql-client \
     nginx supervisor wget unzip \
     npm git golang \
     && rm -rf /var/lib/apt/lists/*
-# 配置 MySQL 数据目录
-RUN mkdir -p /var/lib/mysql /var/run/mysqld && \
-    chown -R mysql:mysql /var/lib/mysql /var/run/mysqld
-# 配置 MySQL
-RUN mkdir -p /var/run/mysqld && chown -R mysql:mysql /var/run/mysqld
-COPY ./sql/init.sql /docker-entrypoint-initdb.d/
-RUN chmod +r /docker-entrypoint-initdb.d/init.sql 
-ENV MYSQL_ROOT_PASSWORD=render123
-ENV MYSQL_DATABASE=myapp
-# 初始化 MySQL
-RUN mysqld --initialize-insecure --user=mysql --skip-test-db
-# 启动服务并执行初始化
-RUN service mysql start && \
-    mysql -uroot -e \
-      "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASSWORD'; \
-      CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE; \
-      USE $MYSQL_DATABASE; \
-      SOURCE /docker-entrypoint-initdb.d/init.sql;" && \
-    service mysql stop
-# 安装 Adminer（数据库管理）
-RUN mkdir -p /var/www/adminer && \
-    wget -O /var/www/adminer/index.php https://github.com/vrana/adminer/releases/download/v4.8.1/adminer-4.8.1.php
 
 # 安装 Gotty（Web 终端）
 RUN go install github.com/sorenisanerd/gotty@latest
