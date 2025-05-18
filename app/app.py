@@ -13,4 +13,4 @@ def data():
 
 if __name__ == '__main__':
     port = os.getenv('PORT', 5000)
-    app.run(host='0.0.0.0', port=port)
+    app.run(debug=True, host='0.0.0.0', port=port)
