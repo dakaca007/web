@@ -19,7 +19,7 @@ ENV PATH="$PATH:/root/go/bin"
 
 
 # 复制代码
-COPY ./app /app
+
 COPY ./terminal.sh /usr/bin/
 RUN chmod +x /usr/bin/terminal.sh
 COPY ./nginx.conf /etc/nginx/nginx.conf
