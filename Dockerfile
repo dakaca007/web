@@ -1,60 +1,43 @@
+# 基于 Ubuntu 22.04
 FROM ubuntu:22.04
 
-# 设置非交互式时区配置
+# 设置时区 & 非交互模式
 ENV DEBIAN_FRONTEND=noninteractive TZ=Asia/Shanghai
-ENV PORT=3000
-RUN echo $TZ > /etc/timezone && \
-    apt update && \
-    apt install -y tzdata && \
-    dpkg-reconfigure --frontend noninteractive tzdata
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# 安装核心依赖（包含编译工具）
-RUN apt update && \
-    apt install -y \
-    php php-cli php-curl \
-    php-dev php-pear \
-    php-dom php-mbstring php-xml php-zip php-json \
-    php-bcmath php-gd php-intl php-soap php-opcache \
-    php-tokenizer php-xmlwriter php-ctype php-iconv php-simplexml php-posix \
-    nginx \
-    supervisor \
-    curl git \
-    libcurl4 libssl-dev libbrotli-dev \
-    zlib1g-dev libcurl4-openssl-dev \
-    g++ make autoconf \  
-    unzip \
-    zip && \
-    rm -rf /var/lib/apt/lists/*
+# 安装系统依赖
+RUN apt update && apt install -y \
+    python3 python3-pip python3-venv \
+    mysql-server mysql-client \
+    nginx supervisor wget unzip \
+    npm git golang \
+    && rm -rf /var/lib/apt/lists/*
 
-# 安装 Swoole 扩展（确认 PHP 版本路径）
-RUN pecl install swoole && \
-    echo "extension=swoole.so" > /etc/php/8.1/cli/conf.d/20-swoole.ini
+# 配置 MySQL
+RUN mkdir -p /var/run/mysqld && chown -R mysql:mysql /var/run/mysqld
+COPY mysql/init.sql /docker-entrypoint-initdb.d/
+ENV MYSQL_ROOT_PASSWORD=render123
+ENV MYSQL_DATABASE=myapp
 
-# 内存限制配置
-RUN echo "memory_limit = 2G" > /etc/php/8.1/cli/conf.d/99-custom.ini
+# 安装 Adminer（数据库管理）
+RUN mkdir -p /var/www/adminer && \
+    wget -O /var/www/adminer/index.php https://github.com/vrana/adminer/releases/download/v4.8.1/adminer-4.8.1.php
 
-# 设置工作目录
-WORKDIR /usr/src/app
+# 安装 Gotty（Web 终端）
+RUN go install github.com/sorenisanerd/gotty@latest
+ENV PATH="$PATH:/root/go/bin"
 
-# 复制项目文件
-COPY . .
+# 配置 Python 环境
+WORKDIR /app
+COPY ./app/requirements.txt .
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-# 配置 Nginx（修复 WebSocket 代理）
-RUN rm -f /etc/nginx/sites-enabled/default
-COPY nginx.conf /etc/nginx/sites-available/default
-RUN ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
+# 复制代码
+COPY ./app /app
+COPY ./nginx.conf /etc/nginx/nginx.conf
+COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# 配置 Supervisord
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# 安装 Composer（可选）
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
-    composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/
-
-# 安装 PHP 依赖（仅在 composer.json 存在时执行）
-RUN if [ -f composer.json ]; then composer install --no-dev --optimize-autoloader; fi
-
-# 暴露端口
+# 暴露端口 (Render 使用环境变量 PORT)
 EXPOSE 80
 
 # 启动服务
