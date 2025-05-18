@@ -25,9 +25,15 @@ RUN chmod +x /usr/bin/terminal.sh
 RUN rm /etc/nginx/sites-enabled/default
 COPY ./nginx.conf /etc/nginx/sites-available/default
 RUN ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
+# 安装最新版 Go
+RUN wget https://go.dev/dl/go1.21.1.linux-amd64.tar.gz \
+    && tar -C /usr/local -xzf go1.21.1.linux-amd64.tar.gz \
+    && rm go1.21.1.linux-amd64.tar.gz
+ENV PATH="$PATH:/usr/local/go/bin"
+
 # 安装 Gotty（Web 终端）
 RUN go install github.com/sorenisanerd/gotty@latest
-ENV PATH="$PATH:/root/go/bin"
+ENV PATH="/usr/local/go/bin:/root/go/bin:$PATH"
 
  
 # 配置 Supervisord
