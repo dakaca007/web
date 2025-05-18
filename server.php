@@ -1,6 +1,7 @@
 <?php
 // 创建 Swoole WebSocket 服务器（修正地址和端口）
-$server = new Swoole\WebSocket\Server("0.0.0.0", 3000);
+$port = getenv('PORT') ?: 3000;  // 兼容 Render 的环境变量
+$server = new Swoole\WebSocket\Server("0.0.0.0", $port);
 
 // 客户端连接事件
 $server->on('Open', function (Swoole\WebSocket\Server $server, $request) {
