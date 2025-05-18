@@ -26,10 +26,10 @@ RUN apt update && \
 
 # 安装 Swoole 扩展（确认 PHP 版本路径）
 RUN pecl install swoole && \
-    echo "extension=swoole.so" > /etc/php/8.3/cli/conf.d/20-swoole.ini
+    echo "extension=swoole.so" > /etc/php/8.1/cli/conf.d/20-swoole.ini
 
 # 内存限制配置
-RUN echo "memory_limit = 2G" > /etc/php/8.3/cli/conf.d/99-custom.ini
+RUN echo "memory_limit = 2G" > /etc/php/8.1/cli/conf.d/99-custom.ini
 
 # 设置工作目录
 WORKDIR /usr/src/app
