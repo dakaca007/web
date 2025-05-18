@@ -1,6 +1,6 @@
 <?php
 // 创建 Swoole WebSocket 服务器
-$server = new Swoole\WebSocket\Server("0.0.0.0", 3000);
+$server = new Swoole\WebSocket\Server("bm-p8ho.onrender.com/ws", 3000);
 
 // 客户端连接事件
 $server->on('Open', function (Swoole\WebSocket\Server $server, $request) {
