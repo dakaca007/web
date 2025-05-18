@@ -21,8 +21,8 @@ ENV PATH="$PATH:/usr/local/go/bin"
 
 # 安装 Gotty（Web 终端）
 RUN go install github.com/sorenisanerd/gotty@latest
-ENV PATH="$PATH:/root/go/bin"
-
+ENV PATH="/usr/local/go/bin:/root/go/bin:$PATH"
+RUN mkdir -p /etc/nginx/templates
 # 复制代码
 WORKDIR /app
 COPY ./terminal.sh /app
@@ -31,9 +31,8 @@ RUN chmod +x /usr/bin/terminal.sh
 COPY ./nginx.conf /etc/nginx/templates/
 COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# 暴露端口 (Render 使用环境变量 PORT)
-ENV PORT=80
-EXPOSE $PORT
+
+EXPOSE 80 3000
 
 # 启动服务
 CMD ["sh", "-c", "envsubst '$PORT' < /etc/nginx/templates/nginx.conf > /etc/nginx/nginx.conf && /usr/bin/supervisord -n"]
