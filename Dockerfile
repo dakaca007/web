@@ -1,5 +1,8 @@
 # 使用 Ubuntu 作为基础镜像（支持 PHP + Nginx + Supervisord）
 FROM ubuntu:22.04
+# 设置时区 & 非交互模式
+ENV DEBIAN_FRONTEND=noninteractive TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # 安装依赖
 RUN apt update && \
