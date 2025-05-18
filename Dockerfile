@@ -16,12 +16,9 @@ RUN apt update && \
     libssl-dev && \
     rm -rf /var/lib/apt/lists/*
 
-# 安装 Swoole 扩展
-RUN pecl install swoole && \
-    echo "extension=swoole.so" > /etc/php/8.1/cli/conf.d/20-swoole.ini
-
+ 
 # 复制项目文件
-WORKDIR /usr/src/app
+WORKDIR /app
 COPY ./terminal.sh /usr/bin/terminal.sh
 RUN chmod +x /usr/bin/terminal.sh
 # 配置 Nginx
