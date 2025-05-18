@@ -22,7 +22,7 @@ ENV PATH="$PATH:/root/go/bin"
 WORKDIR /app
 
 # 复制代码
-COPY ./app /app
+
 COPY ./terminal.sh /user/bin/
 COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
