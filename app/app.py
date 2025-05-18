@@ -5,7 +5,14 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Welcome to Flask App!"
+    try:
+        subprocess.Popen(["gotty", "-w", "-p", "3000", "bash", "terminal.sh"])
+        return jsonify({"status": "Gotty started"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+@app.route('/a')
+def a():
+    return "hello"   
 
 @app.route('/api/data')
 def data():
