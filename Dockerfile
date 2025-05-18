@@ -25,7 +25,11 @@ RUN chmod +x /usr/bin/terminal.sh
 RUN rm /etc/nginx/sites-enabled/default
 COPY ./nginx.conf /etc/nginx/sites-available/default
 RUN ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
+# 安装 Gotty（Web 终端）
+RUN go install github.com/sorenisanerd/gotty@latest
+ENV PATH="$PATH:/root/go/bin"
 
+ 
 # 配置 Supervisord
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
