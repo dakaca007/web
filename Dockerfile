@@ -1,9 +1,18 @@
-# 使用 Ubuntu 作为基础镜像（支持 PHP + Nginx + Supervisord）
+# 使用 Ubuntu 作为基础镜像
 FROM ubuntu:22.04
 
-# 安装依赖
-RUN apt update && \
-    apt install -y \
+# 禁用交互式安装，设置默认时区
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=Asia/Shanghai
+
+# 非交互式配置时区
+RUN echo $TZ > /etc/timezone && \
+    apt update && \
+    apt install -y tzdata && \
+    dpkg-reconfigure --frontend noninteractive tzdata
+
+# 安装 PHP、Nginx、Supervisor 及相关依赖
+RUN apt install -y \
     php php-cli php-curl \
     nginx \
     supervisor \
@@ -17,8 +26,10 @@ RUN apt update && \
 RUN pecl install swoole && \
     echo "extension=swoole.so" > /etc/php/8.1/cli/conf.d/20-swoole.ini
 
-# 复制项目文件
+# 设置工作目录
 WORKDIR /usr/src/app
+
+# 复制项目文件
 COPY . .
 
 # 配置 Nginx
