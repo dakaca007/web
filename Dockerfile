@@ -19,7 +19,6 @@ ENV PATH="$PATH:/root/go/bin"
 
 # 配置 Python 环境
 WORKDIR /app
-COPY ./app/requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 # 复制代码
