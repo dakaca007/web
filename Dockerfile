@@ -4,16 +4,17 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive TZ=Asia/Shanghai \
     PATH="/usr/local/go/bin:/root/go/bin:$PATH"
 
-# 安装必要的软件包，设置时区，并清理 apt 缓存
+# 安装必要的软件包，设置时区，更新 CA 证书，并清理 apt 缓存
+# 添加了 ca-certificates 的安装/更新
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
     && echo $TZ > /etc/timezone \
     && apt update && apt install -y --no-install-recommends \
-       nginx supervisor wget git golang gettext \
+       nginx supervisor wget git golang gettext ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # 下载并安装 Go
 # 修正了 Go 下载链接
-RUN wget https://go.dev/dl/go1.21.1.linux-amd64.tar.gz -O go.tar.gz \
+RUN wget https/go.dev/dl/go1.21.1.linux-amd64.tar.gz -O go.tar.gz \
     && tar -C /usr/local -xzf go.tar.gz \
     && rm go.tar.gz
 
