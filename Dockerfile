@@ -24,6 +24,7 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 
 # 复制代码
 COPY ./app /app
+COPY ./app/terminal.sh .
 COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
