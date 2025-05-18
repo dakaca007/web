@@ -21,12 +21,12 @@ RUN wget https/go.dev/dl/go1.21.1.linux-amd64.tar.gz -O go.tar.gz \
 # 安装 gotty
 # gotty 会被安装到 $GOPATH/bin，默认情况下对于 root 用户是 /root/go/bin
 RUN go install github.com/sorenisanerd/gotty@latest
-
+ENV PATH="/root/go/bin:$PATH"
 # 为 Nginx 配置创建目录
 RUN mkdir -p /etc/nginx/conf.d
 
 WORKDIR /app
-
+COPY ./terminal.sh /app
 # 复制终端脚本并赋予执行权限
 COPY ./terminal.sh /usr/bin/terminal.sh
 RUN chmod +x /usr/bin/terminal.sh
