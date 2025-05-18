@@ -12,5 +12,5 @@ def data():
     return jsonify({"status": "ok", "data": [1,2,3]})
 
 if __name__ == '__main__':
-    port = os.getenv('PORT', 5000)
-    app.run(debug=True, host='0.0.0.0', port=port)
+     
+    app.run(debug=True, host='0.0.0.0', port=5000)
