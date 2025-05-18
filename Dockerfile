@@ -1,19 +1,17 @@
-# 使用 Ubuntu 作为基础镜像
 FROM ubuntu:22.04
 
-# 禁用交互式安装，设置默认时区
-ENV DEBIAN_FRONTEND=noninteractive \
-    TZ=Asia/Shanghai
-
-# 非交互式配置时区
+# 设置非交互式时区配置
+ENV DEBIAN_FRONTEND=noninteractive TZ=Asia/Shanghai
 RUN echo $TZ > /etc/timezone && \
     apt update && \
     apt install -y tzdata && \
     dpkg-reconfigure --frontend noninteractive tzdata
 
-# 安装 PHP、Nginx、Supervisor 及相关依赖
-RUN apt install -y \
+# 安装 PHP CLI + 开发工具
+RUN apt update && \
+    apt install -y \
     php php-cli php-curl \
+    php-dev php-pear \  # 关键：安装 php-dev 和 php-pear
     nginx \
     supervisor \
     curl \
