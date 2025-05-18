@@ -29,7 +29,8 @@ COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # 暴露端口 (Render 使用环境变量 PORT)
-EXPOSE 80
+ENV PORT=80
+EXPOSE $PORT
 
 # 启动服务
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
