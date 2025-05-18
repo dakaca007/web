@@ -19,8 +19,9 @@ RUN apt update && \
     supervisor \
     curl git \
     libcurl4 libssl-dev libbrotli-dev \
-    g++ make autoconf \  # 编译工具
-    unzip zip && \
+    g++ make autoconf \  
+    unzip \
+    zip && \
     rm -rf /var/lib/apt/lists/*
 
 # 安装 Swoole 扩展（确认 PHP 版本路径）
