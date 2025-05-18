@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+import subprocess
 import os
 
 app = Flask(__name__)
@@ -10,9 +11,7 @@ def home():
         return jsonify({"status": "Gotty started"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-@app.route('/a')
-def a():
-    return "hello"   
+  
 
 @app.route('/api/data')
 def data():
