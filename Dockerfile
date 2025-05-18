@@ -11,7 +11,7 @@ RUN echo $TZ > /etc/timezone && \
 RUN apt update && \
     apt install -y \
     php php-cli php-curl \
-    php-dev php-pear \  # 关键：安装 php-dev 和 php-pear
+    php-dev php-pear \  
     nginx \
     supervisor \
     curl \
