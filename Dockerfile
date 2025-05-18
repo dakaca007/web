@@ -36,4 +36,4 @@ ENV PORT=80
 EXPOSE $PORT
 
 # 启动服务
-CMD ["sh", "-c", "envsubst '$PORT' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/nginx.conf && /usr/bin/supervisord -n"]
+CMD ["sh", "-c", "envsubst '$PORT' < /etc/nginx/templates/nginx.conf > /etc/nginx/nginx.conf && /usr/bin/supervisord -n"]
