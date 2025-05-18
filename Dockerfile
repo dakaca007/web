@@ -2,6 +2,7 @@ FROM ubuntu:22.04
 
 # 设置非交互式时区配置
 ENV DEBIAN_FRONTEND=noninteractive TZ=Asia/Shanghai
+ENV PORT=3000
 RUN echo $TZ > /etc/timezone && \
     apt update && \
     apt install -y tzdata && \
@@ -9,6 +10,7 @@ RUN echo $TZ > /etc/timezone && \
 
 # 安装核心依赖（包含编译工具）
 RUN apt update && \
+    zlib1g-dev libcurl4-openssl-dev \
     apt install -y \
     php php-cli php-curl \
     php-dev php-pear \
