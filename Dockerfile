@@ -7,51 +7,37 @@ RUN echo $TZ > /etc/timezone && \
     apt install -y tzdata && \
     dpkg-reconfigure --frontend noninteractive tzdata
 
-# 安装 PHP CLI + 开发工具
+# 安装核心依赖（包含编译工具）
 RUN apt update && \
     apt install -y \
     php php-cli php-curl \
     php-dev php-pear \
-    php-dom \
-    php-mbstring \
-    php-xml \
-    php-zip \
-    php-bcmath \
-    php-gd \
-    php-intl \
-    php-soap \
-    php-opcache \
-    php-tokenizer \
-    php-xmlwriter \
-    php-ctype \
-    php-iconv \
-    php-json \
-    php-simplexml \
-    php-posix \
+    php-dom php-mbstring php-xml php-zip php-json \
+    php-bcmath php-gd php-intl php-soap php-opcache \
+    php-tokenizer php-xmlwriter php-ctype php-iconv php-simplexml php-posix \
     nginx \
     supervisor \
-    curl \
-    git \
-    libcurl4 \
-    libssl-dev \
-    libbrotli-dev \
-    unzip \
-    zip && \
+    curl git \
+    libcurl4 libssl-dev libbrotli-dev \
+    g++ make autoconf \  # 编译工具
+    unzip zip && \
     rm -rf /var/lib/apt/lists/*
 
-# 安装 Swoole 扩展
+# 安装 Swoole 扩展（确认 PHP 版本路径）
 RUN pecl install swoole && \
     echo "extension=swoole.so" > /etc/php/8.1/cli/conf.d/20-swoole.ini
-# 增加 PHP 内存限制
+
+# 内存限制配置
 RUN echo "memory_limit = 2G" > /etc/php/8.1/cli/conf.d/99-custom.ini
+
 # 设置工作目录
 WORKDIR /usr/src/app
 
 # 复制项目文件
 COPY . .
 
-# 配置 Nginx
-RUN rm /etc/nginx/sites-enabled/default
+# 配置 Nginx（修复 WebSocket 代理）
+RUN rm -f /etc/nginx/sites-enabled/default
 COPY nginx.conf /etc/nginx/sites-available/default
 RUN ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
 
@@ -59,12 +45,13 @@ RUN ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # 安装 Composer（可选）
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
+    composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/
 
-# 安装 PHP 依赖（可选）
-RUN composer install --no-dev --optimize-autoloader
+# 安装 PHP 依赖（仅在 composer.json 存在时执行）
+RUN if [ -f composer.json ]; then composer install --no-dev --optimize-autoloader; fi
 
-# 暴露 80 端口
+# 暴露端口
 EXPOSE 80
 
 # 启动服务
