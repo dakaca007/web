@@ -16,9 +16,15 @@ RUN apt update && apt install -y \
 # 配置 MySQL
 RUN mkdir -p /var/run/mysqld && chown -R mysql:mysql /var/run/mysqld
 COPY mysql/init.sql /docker-entrypoint-initdb.d/
+RUN chmod +r /docker-entrypoint-initdb.d/init.sql 
 ENV MYSQL_ROOT_PASSWORD=render123
 ENV MYSQL_DATABASE=myapp
-
+# 在安装 MySQL 后添加以下步骤
+RUN mysqld --initialize-insecure --user=mysql && \
+    service mysql start && \
+    mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;" && \
+    mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE < /docker-entrypoint-initdb.d/init.sql && \
+    service mysql stop
 # 安装 Adminer（数据库管理）
 RUN mkdir -p /var/www/adminer && \
     wget -O /var/www/adminer/index.php https://github.com/vrana/adminer/releases/download/v4.8.1/adminer-4.8.1.php
