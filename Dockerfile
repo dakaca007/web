@@ -15,7 +15,7 @@ RUN apt update && apt install -y \
 
 # 配置 MySQL
 RUN mkdir -p /var/run/mysqld && chown -R mysql:mysql /var/run/mysqld
-COPY mysql/init.sql /docker-entrypoint-initdb.d/
+COPY ./mysql/init.sql /docker-entrypoint-initdb.d/
 RUN chmod +r /docker-entrypoint-initdb.d/init.sql 
 ENV MYSQL_ROOT_PASSWORD=render123
 ENV MYSQL_DATABASE=myapp
