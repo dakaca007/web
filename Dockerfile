@@ -17,6 +17,7 @@ RUN apt update && \
     curl \
     git \
     libcurl4 \
+    libbrotli-dev \
     libssl-dev && \
     rm -rf /var/lib/apt/lists/*
 
