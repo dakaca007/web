@@ -45,7 +45,7 @@ RUN mkdir -p /var/www/html/php \
     && chown -R www-data:www-data /var/www/html/php \
     && chmod 755 /var/www/html/php/*.php
 COPY index.php /var/www/html/php
-COPY connect.php /var/www/html/php
+COPY db_connect.php /var/www/html/php
 COPY login.php /var/www/html/php
 COPY register.php /var/www/html/php
 COPY /static /var/www/html/php/static
