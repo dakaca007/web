@@ -8,9 +8,29 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
     ncurses-bin \
     openssl \
     nginx \
-    php-fpm \
     python3 \
     python3-pip \
+    libldap-dev \
+    libssl-dev \
+    libcurl4-openssl-dev \
+    libbz2-dev \
+    libgmp-dev \
+    libpspell-dev \
+    libsnmp-dev \
+    libtidy-dev \
+    libxml2-dev \
+    libxslt1-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libwebp-dev \
+    graphicsmagick-libmagick-dev-compat \
+    libmagickwand-dev \
+    libsasl2-dev \
+    snmp \
+    libpq-dev \
+    libsqlite3-dev \
+    libinterbase-dev \
     && rm -rf /var/lib/apt/lists/*
 
  # 配置Nginx目录权限（关键步骤）
@@ -29,7 +49,42 @@ RUN curl -LO https://github.com/yudai/gotty/releases/download/v1.0.1/gotty_linux
 
 # 安装指定版本 PHP-FPM
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
-    php8.1-fpm \   
+    php8.1-fpm \  
+    php8.1-cgi \
+    php8.1-cli \
+    php8.1-common \
+    php8.1-curl \
+    php8.1-dev \
+    php8.1-gd \
+    php8.1-gmp \
+    php8.1-ldap \
+    php8.1-mbstring \
+    php8.1-mysql \
+    php8.1-odbc \
+    php8.1-opcache \
+    php8.1-pgsql \
+    php8.1-pspell \
+    php8.1-readline \
+    php8.1-snmp \
+    php8.1-sqlite3 \
+    php8.1-tidy \
+    php8.1-xml \
+    php8.1-bcmath \
+    php8.1-bz2 \
+    php8.1-dba \
+    php8.1-ds \
+    php8.1-enchant \
+    php8.1-gearman \
+    php8.1-gmagick \
+    php8.1-gnupg \
+    php8.1-http \
+    php8.1-igbinary \
+    php8.1-interbase \
+    php8.1-amqp \
+    php8.1-apcu \
+    php8.1-ast \
+    php-sass \
+    libphp8.1-embed \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /var/www/html/php
 # 创建 PHP-FPM 运行时目录
