@@ -50,7 +50,7 @@ RUN useradd -m appuser && \
 # 复制启动脚本并设置权限（在切换用户前完成）
 COPY start.sh /start.sh
 RUN chown appuser:appuser /start.sh && chmod +x /start.sh
-USER appuser
+USER root
 
 
 
