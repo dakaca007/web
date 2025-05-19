@@ -5,6 +5,25 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
+		.auth-box {
+        max-width: 400px;
+        margin: 50px auto;
+        padding: 20px;
+        background: var(--card-background);
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .auth-form input {
+        width: 100%;
+        margin-bottom: 15px;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    .auth-actions {
+        display: flex;
+        gap: 10px;
+    }
         :root {
             --primary-color: #2196F3;
             --background-color: #f5f5f5;
@@ -125,10 +144,33 @@
                 height: calc(100vh - 140px);
             }
         }
+
     </style>
 </head>
 <body>
-    <div class="container">
+	<div class="auth-box" id="authBox">
+    <div id="loginForm" class="auth-form">
+        <h2>用户登录</h2>
+        <input type="text" id="loginUser" placeholder="用户名">
+        <input type="password" id="loginPass" placeholder="密码">
+        <div class="auth-actions">
+            <button onclick="login()">登录</button>
+            <button onclick="showRegister()">注册</button>
+        </div>
+    </div>
+
+    <div id="registerForm" class="auth-form" style="display: none;">
+        <h2>用户注册</h2>
+        <input type="text" id="regUser" placeholder="用户名">
+        <input type="password" id="regPass" placeholder="密码">
+        <div class="auth-actions">
+            <button onclick="register()">注册</button>
+            <button onclick="showLogin()">返回登录</button>
+        </div>
+    </div>
+</div>
+
+    <div class="container" id="chatContainer" style="display: none;">
         <h2>📜 聊天记录</h2>
         <div id="chatLog"></div>
     </div>
@@ -139,6 +181,52 @@
     </form>
 
     <script>
+		// 添加认证逻辑
+    function showRegister() {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('registerForm').style.display = 'block';
+    }
+
+    function showLogin() {
+        document.getElementById('registerForm').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'block';
+    }
+
+    async function login() {
+        const response = await fetch('/php/login.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                username: document.getElementById('loginUser').value,
+                password: document.getElementById('loginPass').value
+            })
+        });
+        
+        if (response.ok) {
+            document.getElementById('authBox').style.display = 'none';
+            document.getElementById('chatContainer').style.display = 'block';
+        } else {
+            alert('登录失败');
+        }
+    }
+
+    async function register() {
+        const response = await fetch('/php/register.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                username: document.getElementById('regUser').value,
+                password: document.getElementById('regPass').value
+            })
+        });
+        
+        if (response.ok) {
+            alert('注册成功，请登录');
+            showLogin();
+        } else {
+            alert('注册失败');
+        }
+    }
         // 消息处理逻辑保持不变
         document.getElementById('sendForm').addEventListener('submit', function(e) {
             e.preventDefault();

@@ -1,6 +1,7 @@
 import json
 import time
 import requests
+import pymysql.cursors
 from flask import Flask, jsonify, request, Response
 import threading
 app = Flask(__name__)
@@ -10,28 +11,47 @@ def keep_alive():
         threading.Event().wait(300)  # 每5分钟执行
 messages = []
 lock = threading.Lock()
+# MySQL配置
+db_conf = {
+    'host': 'mysql.sqlpub.com',
+    'user': 'sujiangxi',
+    'password': 'U4JcgUOkcHMI1suU',
+    'db': 'mysql_app',
+    'charset': 'utf8mb4',
+    'cursorclass': pymysql.cursors.DictCursor
+}
 
+def get_db():
+    return pymysql.connect(**db_conf)
 @app.route('/send', methods=['POST'])
 def send():
-    msg = request.form.get('text')
-    with lock:
-        messages.append(msg)
-    return jsonify(ok=1)
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            content = request.form.get('text')
+            # 实际应用中需要验证用户身份
+            cursor.execute("INSERT INTO messages (user_id, content) VALUES (1, %s)", (content,))
+            db.commit()
+        return jsonify(ok=1)
+    finally:
+        db.close()
 
 @app.route('/sse')
 def sse():
     def event_stream():
-        start_time = time.time()
-        last_len = 0
-        while time.time() - start_time < 1:
-            with lock:
-                if len(messages) > last_len:
-                    yield f"data: {json.dumps(messages)}\n\n"
-                    last_len = len(messages)
-            time.sleep(0.01)
-        # 显式关闭连接前发送结束信号
-        print("[SSE] 连接即将关闭")
-        yield ": connection closed\n\n"
+        last_id = 0
+        while True:
+            db = get_db()
+            try:
+                with db.cursor() as cursor:
+                    cursor.execute("SELECT * FROM messages WHERE id > %s ORDER BY id DESC LIMIT 10", (last_id,))
+                    messages = cursor.fetchall()
+                    if messages:
+                        last_id = messages[0]['id']
+                        yield f"data: {json.dumps([m['content'] for m in messages])}\n\n"
+            finally:
+                db.close()
+            time.sleep(0.5)
     return Response(event_stream(), mimetype='text/event-stream')
 @app.route('/health-check')
 def health_check():

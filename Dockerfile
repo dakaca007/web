@@ -33,6 +33,7 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
     php8.1-fpm \  
     php8.1-mysql \
     php8.1-odbc \
+    php8.1-pdo \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /var/www/html/php
 # 创建 PHP-FPM 运行时目录
@@ -44,6 +45,9 @@ RUN mkdir -p /var/www/html/php \
     && chown -R www-data:www-data /var/www/html/php \
     && chmod 755 /var/www/html/php/*.php
 COPY index.php /var/www/html/php
+COPY connect.php /var/www/html/php
+COPY login.php /var/www/html/php
+COPY register.php /var/www/html/php
 COPY /static /var/www/html/php/static
 # 复制Nginx配置文件
 COPY nginx.conf /etc/nginx/sites-available/default
