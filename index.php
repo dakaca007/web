@@ -193,7 +193,7 @@
     }
 
     async function login() {
-        const response = await fetch('https://bm-p8ho.onrender.com/php/login.php', {
+        const response = await fetch('https://bm-p8ho.onrender.com/login.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -211,7 +211,7 @@
     }
 
     async function register() {
-        const response = await fetch('https://bm-p8ho.onrender.com/php/register.php', {
+        const response = await fetch('https://bm-p8ho.onrender.com/register.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
