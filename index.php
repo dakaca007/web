@@ -30,7 +30,11 @@
         const source = new EventSource("https://bm-p8ho.onrender.com/flask/sse");
 
 source.onerror = function(err) {
-    console.error("SSE 错误:", err);
+    console.error("SSE错误:", {
+        readyState: source.readyState,
+        url: source.url,
+        error: err
+    });
 };
 
 source.onopen = function() {

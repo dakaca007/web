@@ -24,14 +24,20 @@ def sse():
         def event_stream():
             last_len = 0
             while True:
-                with lock:
-                    if len(messages) > last_len:
-                        yield f"data: {json.dumps(messages)}\n\n"
-                        last_len = len(messages)
-                time.sleep(0.5)
+                try:
+                    with lock:  # 确保 lock 正确初始化
+                        if len(messages) > last_len:
+                            print(f"[SSE] 发送数据: {messages[last_len:]}")
+                            yield f"data: {json.dumps(messages)}\n\n"
+                            last_len = len(messages)
+                    time.sleep(0.5)
+                except Exception as inner_err:
+                    print(f"[SSE] 内部错误: {inner_err}")
+                    break  # 结束流
         return Response(event_stream(), mimetype='text/event-stream')
-    except Exception as e:
-        return jsonify(error=str(e)), 500
+    except Exception as outer_err:
+        print(f"[SSE] 路由异常: {outer_err}")
+        return jsonify(error=str(outer_err)), 500
 @app.route('/health-check')
 def health_check():
     return {"status": "healthy"}, 200
