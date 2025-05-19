@@ -23,14 +23,14 @@ def sse():
     def event_stream():
         start_time = time.time()
         last_len = 0
-        while time.time() - start_time < 20:  # 限制 30 秒
+        while time.time() - start_time < 5:
             with lock:
                 if len(messages) > last_len:
                     yield f"data: {json.dumps(messages)}\n\n"
                     last_len = len(messages)
             time.sleep(0.5)
-        print("[SSE] 30 秒超时，结束连接")
-        # 可选：发送结束信号
+        # 显式关闭连接前发送结束信号
+        print("[SSE] 连接即将关闭")
         yield ": connection closed\n\n"
     return Response(event_stream(), mimetype='text/event-stream')
 @app.route('/health-check')

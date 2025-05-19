@@ -27,10 +27,15 @@
             });
         });
 
-         function connectSSE() {
-    const source = new EventSource("https://bm-p8ho.onrender.com/flask/sse");
+      let source;
+
+function connectSSE() {
+    source = new EventSource("https://bm-p8ho.onrender.com/flask/sse");
 
     source.onmessage = function(event) {
+        // 忽略特殊控制信号（如 ": connection closed"）
+        if (event.data.startsWith(":")) return;
+
         try {
             const data = JSON.parse(event.data);
             const log = document.getElementById('chatLog');
@@ -42,14 +47,18 @@
     };
 
     source.onerror = function(err) {
-        console.error("SSE 错误:", err);
-    };
+        console.error("SSE错误:", {
+            readyState: source.readyState,
+            url: source.url,
+            error: err
+        });
 
-    // 30 秒后自动重连（略短于服务器超时时间）
-    setTimeout(() => {
-        source.close();
-        connectSSE();  // 重新连接
-    }, 29000);
+        // 如果是正常关闭（readyState === 2），不重连
+        if (source.readyState === 2) {
+            console.log("服务器主动关闭连接，将在 1 秒后重新连接");
+            setTimeout(connectSSE, 1000);  // 延迟重连
+        }
+    };
 }
 
 // 初始连接
