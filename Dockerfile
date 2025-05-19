@@ -21,11 +21,7 @@ RUN curl -LO https://github.com/yudai/gotty/releases/download/v1.0.1/gotty_linux
     mv gotty /usr/local/bin/ && \
     chmod +x /usr/local/bin/gotty && \
     rm gotty_linux_amd64.tar.gz
-
-# 创建应用目录
-RUN mkdir -p /home/appuser/app/static && \
-    chown -R appuser:appuser /home/appuser/app
-
+USER appuser
 # 配置非root用户并生成证书
 RUN useradd -m appuser && \
     openssl req -x509 -newkey rsa:4096 -nodes -days 365 \
@@ -33,21 +29,25 @@ RUN useradd -m appuser && \
       -keyout /home/appuser/.gotty.key \
       -out /home/appuser/.gotty.crt && \
     chown appuser:appuser /home/appuser/.gotty.*
+# 创建应用目录
+RUN mkdir -p /home/appuser/app/static && \
+    chown -R appuser:appuser /home/appuser/app
+
+ 
 
 # 复制应用文件
 COPY app.py /home/appuser/app/
 COPY static/ /home/appuser/app/static/
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-USER appuser
+
 
 # 安装Flask依赖（以用户身份运行）
 RUN pip3 install --user flask
 
-USER root
-RUN chown -R appuser:appuser /home/appuser
-USER appuser
 
-EXPOSE 80 5000 8080
 
-CMD ["supervisord", "-n"]
+
+
+EXPOSE 80
+CMD ["gotty", "--permit-write", "--port", "80", "bash"]
