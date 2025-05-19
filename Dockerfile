@@ -1,18 +1,22 @@
-# 使用Ubuntu基础镜像确保glibc环境
 FROM ubuntu:22.04
 
 # 安装基础依赖
-RUN apt update && apt install -y curl
+RUN apt update && apt install -y \
+    curl \
+    bash \
+    procps \
+    ncurses-bin
 
-# 下载并安装GoTTY（无需解压嵌套目录）
-RUN curl -LO https://github.com/yudai/gotty/releases/download/v2.0.0-alpha.3/gotty_2.0.0-alpha.3_linux_amd64.tar.gz && \
-    tar zxvf gotty_2.0.0-alpha.3_linux_amd64.tar.gz && \
+# 下载并安装稳定版GoTTY
+RUN curl -LO https://github.com/yudai/gotty/releases/download/v1.0.1/gotty_linux_amd64.tar.gz && \
+    tar zxvf gotty_linux_amd64.tar.gz && \
     mv gotty /usr/local/bin/ && \
     chmod +x /usr/local/bin/gotty && \
-    rm gotty_2.0.0-alpha.3_linux_amd64.tar.gz
-   
+    rm gotty_linux_amd64.tar.gz
 
-USER root
+# 配置非root用户
+RUN useradd -m appuser && chown -R appuser /home/appuser
+USER appuser
+
 EXPOSE 80
-# 修改后的 CMD（启用写入权限 + 分配PTY）
 CMD ["gotty", "-t", "--permit-write", "--port", "80", "bash"]
