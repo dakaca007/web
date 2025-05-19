@@ -1,43 +1,56 @@
 FROM ubuntu:22.04
 
-# 安装基础依赖 & Nginx
-RUN apt update && apt install -y \
+# 安装基础依赖
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
     curl \
     bash \
     procps \
     ncurses-bin \
     openssl \
-    nginx \           
+    nginx \
+    php-fpm \
+    python3 \
+    python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
-# 下载并安装稳定版 GoTTY
-RUN curl -LO https://github.com/yudai/gotty/releases/download/v1.0.1/gotty_linux_amd64.tar.gz \
- && tar zxvf gotty_linux_amd64.tar.gz \
- && mv gotty /usr/local/bin/ \
- && chmod +x /usr/local/bin/gotty \
- && rm gotty_linux_amd64.tar.gz
+# 安装Flask
+RUN pip3 install flask
 
-# 配置非 root 用户并生成 TLS 证书
-RUN useradd -m appuser \
- && openssl req -x509 -newkey rsa:4096 -nodes -days 365 \
+# 下载并安装GoTTY
+RUN curl -LO https://github.com/yudai/gotty/releases/download/v1.0.1/gotty_linux_amd64.tar.gz \
+    && tar zxvf gotty_linux_amd64.tar.gz \
+    && mv gotty /usr/local/bin/ \
+    && chmod +x /usr/local/bin/gotty \
+    && rm gotty_linux_amd64.tar.gz
+
+# 配置非root用户并生成证书
+RUN useradd -m appuser && \
+    openssl req -x509 -newkey rsa:4096 -nodes -days 365 \
       -subj "/CN=localhost" \
       -keyout /home/appuser/.gotty.key \
-      -out /home/appuser/.gotty.crt \
- && chown appuser:appuser /home/appuser/.gotty.*
+      -out /home/appuser/.gotty.crt && \
+    chown appuser:appuser /home/appuser/.gotty.*
 
-# 复制 Nginx 配置模板
-COPY nginx.conf /etc/nginx/sites-available/default
-
-# 添加入口脚本，用于启动 nginx + gotty
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
-# 切换到非 root 用户
 USER appuser
 
-# 暴露唯一的 80 端口
+# 配置PHP测试文件和目录
+RUN mkdir -p /var/www/html/php \
+    && echo "<?php phpinfo(); ?>" > /var/www/html/php/info.php \
+    && chown -R www-data:www-data /var/www/html/php
+
+# 复制Nginx配置文件
+COPY nginx.conf /etc/nginx/sites-available/default
+
+# 配置Flask应用
+COPY flask_app.py /home/appuser/flask_app.py
+RUN chown appuser:appuser /home/appuser/flask_app.py
+
+# 复制启动脚本并设置权限
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+# 暴露端口
 EXPOSE 80
 
-# 启动脚本
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["--permit-write", "--port", "80", "bash"]
+# 启动服务
+CMD ["/start.sh"]
