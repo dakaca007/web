@@ -32,15 +32,6 @@ RUN mkdir -p /var/www/html/php \
 
 # 复制Nginx配置文件
 COPY nginx.conf /etc/nginx/sites-available/default
-
-# 配置Flask应用
-COPY flask_app.py /home/appuser/flask_app.py
-RUN chown appuser:appuser /home/appuser/flask_app.py
-
-# 复制启动脚本并设置权限
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
-
 # 配置非root用户并生成证书
 RUN useradd -m appuser && \
     # 安装sudo
@@ -56,6 +47,15 @@ RUN useradd -m appuser && \
     chown appuser:appuser /home/appuser/.gotty.*
 
 USER appuser
+# 配置Flask应用
+COPY flask_app.py /home/appuser/flask_app.py
+RUN chown appuser:appuser /home/appuser/flask_app.py
+
+# 复制启动脚本并设置权限
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+
 
 # 暴露端口
 EXPOSE 80
