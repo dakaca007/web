@@ -25,6 +25,12 @@ RUN curl -LO https://github.com/yudai/gotty/releases/download/v1.0.1/gotty_linux
 
 # 配置非root用户并生成证书
 RUN useradd -m appuser && \
+    # 安装sudo
+    apt update && apt install -y sudo && \
+    # 添加sudo权限
+    usermod -aG sudo appuser && \
+    echo 'appuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
+    # 生成证书
     openssl req -x509 -newkey rsa:4096 -nodes -days 365 \
       -subj "/CN=localhost" \
       -keyout /home/appuser/.gotty.key \
