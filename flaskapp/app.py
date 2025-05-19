@@ -20,24 +20,19 @@ def send():
 
 @app.route('/sse')
 def sse():
-    try:
-        def event_stream():
-            last_len = 0
-            while True:
-                try:
-                    with lock:  # 确保 lock 正确初始化
-                        if len(messages) > last_len:
-                            print(f"[SSE] 发送数据: {messages[last_len:]}")
-                            yield f"data: {json.dumps(messages)}\n\n"
-                            last_len = len(messages)
-                    time.sleep(0.5)
-                except Exception as inner_err:
-                    print(f"[SSE] 内部错误: {inner_err}")
-                    break  # 结束流
-        return Response(event_stream(), mimetype='text/event-stream')
-    except Exception as outer_err:
-        print(f"[SSE] 路由异常: {outer_err}")
-        return jsonify(error=str(outer_err)), 500
+    def event_stream():
+        start_time = time.time()
+        last_len = 0
+        while time.time() - start_time < 20:  # 限制 30 秒
+            with lock:
+                if len(messages) > last_len:
+                    yield f"data: {json.dumps(messages)}\n\n"
+                    last_len = len(messages)
+            time.sleep(0.5)
+        print("[SSE] 30 秒超时，结束连接")
+        # 可选：发送结束信号
+        yield ": connection closed\n\n"
+    return Response(event_stream(), mimetype='text/event-stream')
 @app.route('/health-check')
 def health_check():
     return {"status": "healthy"}, 200

@@ -27,30 +27,33 @@
             });
         });
 
-        const source = new EventSource("https://bm-p8ho.onrender.com/flask/sse");
+         function connectSSE() {
+    const source = new EventSource("https://bm-p8ho.onrender.com/flask/sse");
 
-source.onerror = function(err) {
-    console.error("SSE错误:", {
-        readyState: source.readyState,
-        url: source.url,
-        error: err
-    });
-};
+    source.onmessage = function(event) {
+        try {
+            const data = JSON.parse(event.data);
+            const log = document.getElementById('chatLog');
+            log.innerHTML = data.map(m => `<p>${m}</p>`).join('');
+            log.scrollTop = log.scrollHeight;
+        } catch (err) {
+            console.error("JSON 解析失败:", err);
+        }
+    };
 
-source.onopen = function() {
-    console.log("SSE 连接已建立");
-};
+    source.onerror = function(err) {
+        console.error("SSE 错误:", err);
+    };
 
-source.onmessage = function(event) {
-    try {
-        const data = JSON.parse(event.data);
-        const log = document.getElementById('chatLog');
-        log.innerHTML = data.map(m => `<p>${m}</p>`).join('');
-        log.scrollTop = log.scrollHeight;
-    } catch (err) {
-        console.error("JSON 解析失败:", err);
-    }
-};
+    // 30 秒后自动重连（略短于服务器超时时间）
+    setTimeout(() => {
+        source.close();
+        connectSSE();  // 重新连接
+    }, 29000);
+}
+
+// 初始连接
+connectSSE();
     </script>
 </body>
 </html>
