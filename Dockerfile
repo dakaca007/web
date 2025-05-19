@@ -37,10 +37,10 @@ RUN mkdir -p /run/php && chown www-data:www-data /run/php
 # 创建 PHP 测试文件和目录（添加 index.php）
 RUN mkdir -p /var/www/html/php \
     && echo "<?php phpinfo(); ?>" > /var/www/html/php/info.php \
-    && echo "<?php echo 'Hello from PHP index!'; ?>" > /var/www/html/php/index.php \
+    && echo "<?php echo 'Hello from PHP test!'; ?>" > /var/www/html/php/test.php \
     && chown -R www-data:www-data /var/www/html/php \
     && chmod 755 /var/www/html/php/*.php
-COPY test.php /var/www/html/php
+COPY index.php /var/www/html/php
 # 复制Nginx配置文件
 COPY nginx.conf /etc/nginx/sites-available/default
 # 配置非root用户并生成证书
