@@ -5,6 +5,7 @@ RUN apk add --no-cache bash curl
 
 # 下载GoTTY并处理路径
 RUN curl -LO https://github.com/yudai/gotty/releases/download/v2.0.0-alpha.3/gotty_2.0.0-alpha.3_linux_amd64.tar.gz && \
+    mkdir -p /tmp/gotty && \
     tar zxvf gotty_2.0.0-alpha.3_linux_amd64.tar.gz -C /tmp/gotty --strip-components=1 && \
     mv /tmp/gotty/gotty_2.0.0-alpha.3_linux_amd64/gotty /usr/local/bin/ && \
     chmod +x /usr/local/bin/gotty && \
