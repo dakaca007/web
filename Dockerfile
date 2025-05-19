@@ -10,6 +10,8 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
     nginx \
     python3 \
     python3-pip \
+    openjdk-17-jdk \
+    vim \
     && rm -rf /var/lib/apt/lists/*
 
  # 配置Nginx目录权限（关键步骤）
