@@ -23,21 +23,7 @@ RUN curl -LO https://github.com/yudai/gotty/releases/download/v1.0.1/gotty_linux
     && chmod +x /usr/local/bin/gotty \
     && rm gotty_linux_amd64.tar.gz
 
-# 配置非root用户并生成证书
-RUN useradd -m appuser && \
-    # 安装sudo
-    apt update && apt install -y sudo && \
-    # 添加sudo权限
-    usermod -aG sudo appuser && \
-    echo 'appuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
-    # 生成证书
-    openssl req -x509 -newkey rsa:4096 -nodes -days 365 \
-      -subj "/CN=localhost" \
-      -keyout /home/appuser/.gotty.key \
-      -out /home/appuser/.gotty.crt && \
-    chown appuser:appuser /home/appuser/.gotty.*
 
-USER appuser
 
 # 配置PHP测试文件和目录
 RUN mkdir -p /var/www/html/php \
@@ -54,6 +40,22 @@ RUN chown appuser:appuser /home/appuser/flask_app.py
 # 复制启动脚本并设置权限
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
+
+# 配置非root用户并生成证书
+RUN useradd -m appuser && \
+    # 安装sudo
+    apt update && apt install -y sudo && \
+    # 添加sudo权限
+    usermod -aG sudo appuser && \
+    echo 'appuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
+    # 生成证书
+    openssl req -x509 -newkey rsa:4096 -nodes -days 365 \
+      -subj "/CN=localhost" \
+      -keyout /home/appuser/.gotty.key \
+      -out /home/appuser/.gotty.crt && \
+    chown appuser:appuser /home/appuser/.gotty.*
+
+USER appuser
 
 # 暴露端口
 EXPOSE 80
