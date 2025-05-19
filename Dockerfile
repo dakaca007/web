@@ -45,7 +45,6 @@ RUN mkdir -p /var/www/html/php \
     && chmod 755 /var/www/html/php/*.php
 COPY index.php /var/www/html/php
 COPY /static /var/www/html/php/static
-COPY /myapp /var/www/html/php/myapp
 # 复制Nginx配置文件
 COPY nginx.conf /etc/nginx/sites-available/default
 
