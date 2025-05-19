@@ -27,14 +27,26 @@
             });
         });
 
-        // 使用 EventSource 监听 SSE
         const source = new EventSource("https://bm-p8ho.onrender.com/flask/sse");
-        source.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            const log = document.getElementById('chatLog');
-            log.innerHTML = data.map(m => `<p>${m}</p>`).join('');
-            log.scrollTop = log.scrollHeight;
-        };
+
+source.onerror = function(err) {
+    console.error("SSE 错误:", err);
+};
+
+source.onopen = function() {
+    console.log("SSE 连接已建立");
+};
+
+source.onmessage = function(event) {
+    try {
+        const data = JSON.parse(event.data);
+        const log = document.getElementById('chatLog');
+        log.innerHTML = data.map(m => `<p>${m}</p>`).join('');
+        log.scrollTop = log.scrollHeight;
+    } catch (err) {
+        console.error("JSON 解析失败:", err);
+    }
+};
     </script>
 </body>
 </html>
