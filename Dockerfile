@@ -17,4 +17,4 @@ RUN echo 'root:123' | chpasswd
 USER root
 EXPOSE 80
 # 使用Render动态端口
-CMD ["gotty", "--port", "$PORT", "--credential", "$GOTTY_CREDENTIAL", "bash"]
+CMD ["gotty", "--port", "80", "--credential", "$GOTTY_CREDENTIAL", "bash"]
