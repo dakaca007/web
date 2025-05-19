@@ -13,8 +13,7 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
-# 安装Flask
-RUN pip3 install flask
+ 
 
 # 下载并安装GoTTY
 RUN curl -LO https://github.com/yudai/gotty/releases/download/v1.0.1/gotty_linux_amd64.tar.gz \
@@ -47,9 +46,7 @@ RUN useradd -m appuser && \
     chown appuser:appuser /home/appuser/.gotty.*
 
 USER appuser
-# 配置Flask应用
-COPY flask_app.py /home/appuser/flask_app.py
-RUN chown appuser:appuser /home/appuser/flask_app.py
+
 
 # 复制启动脚本并设置权限
 COPY start.sh /start.sh
