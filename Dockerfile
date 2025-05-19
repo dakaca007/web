@@ -15,4 +15,4 @@ RUN curl -LO https://github.com/yudai/gotty/releases/download/v2.0.0-alpha.3/got
 USER root
 EXPOSE 80
 # 使用Render动态端口
-CMD ["gotty", "--port", "80", "--credential", "$GOTTY_CREDENTIAL", "bash"]
+CMD ["gotty", "--port", "80", "bash"]
