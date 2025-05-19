@@ -19,7 +19,7 @@
         document.getElementById('sendForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const text = document.getElementById('messageInput').value;
-            fetch('/flask/send', {
+            fetch('https://bm-p8ho.onrender.com/flask/send', {
                 method: 'POST',
                 body: new URLSearchParams({ text })
             }).then(() => {
@@ -28,7 +28,7 @@
         });
 
         // 使用 EventSource 监听 SSE
-        const source = new EventSource("/flask/sse");
+        const source = new EventSource("https://bm-p8ho.onrender.com/flask/sse");
         source.onmessage = function(event) {
             const data = JSON.parse(event.data);
             const log = document.getElementById('chatLog');
