@@ -10,9 +10,7 @@ RUN curl -LO https://github.com/yudai/gotty/releases/download/v2.0.0-alpha.3/got
     mv gotty /usr/local/bin/ && \
     chmod +x /usr/local/bin/gotty && \
     rm gotty_2.0.0-alpha.3_linux_amd64.tar.gz
-
-# 允许root登录（Ubuntu无需修改shadow文件）
-RUN echo 'root:123' | chpasswd   
+   
 
 USER root
 EXPOSE 80
