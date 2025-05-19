@@ -27,10 +27,13 @@ RUN curl -LO https://github.com/yudai/gotty/releases/download/v1.0.1/gotty_linux
 
 
 
-# 配置PHP测试文件和目录
-RUN mkdir -p /var/www/html/php \
-    && echo "<?php phpinfo(); ?>" > /var/www/html/php/info.php \
-    && chown -R www-data:www-data /var/www/html/php
+# 安装指定版本 PHP-FPM
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
+    php8.1-fpm \   
+    && rm -rf /var/lib/apt/lists/*
+
+# 创建 PHP-FPM 运行时目录
+RUN mkdir -p /run/php && chown www-data:www-data /run/php
 
 # 复制Nginx配置文件
 COPY nginx.conf /etc/nginx/sites-available/default
