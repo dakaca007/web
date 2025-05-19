@@ -41,17 +41,33 @@ def sse():
     def event_stream():
         last_id = 0
         while True:
-            db = get_db()
             try:
+                db = get_db()  # 获取数据库连接（建议使用连接池优化）
                 with db.cursor() as cursor:
-                    cursor.execute("SELECT * FROM messages WHERE id > %s ORDER BY id DESC LIMIT 10", (last_id,))
+                    # 查询比 last_id 新的消息，按 ID 升序确保顺序正确
+                    cursor.execute(
+                        "SELECT id, content FROM messages WHERE id > %s ORDER BY id ASC LIMIT 10",
+                        (last_id,)
+                    )
                     messages = cursor.fetchall()
+                    
                     if messages:
-                        last_id = messages[0]['id']
-                        yield f"data: {json.dumps([m['content'] for m in messages])}\n\n"
+                        last_id = messages[-1]['id']  # 更新为最新消息的 ID
+                        data = json.dumps([msg['content'] for msg in messages])
+                        yield f"data: {data}\n\n"
+                    else:
+                        # 发送心跳保持连接，避免超时
+                        yield ":keep-alive\n\n"
+            except Exception as e:
+                print(f"SSE Error: {e}")
+                time.sleep(1)  # 出错时稍作等待
+                continue
             finally:
-                db.close()
-            time.sleep(0.5)
+                if 'db' in locals() and db:  # 确保连接被关闭
+                    db.close()
+            
+            time.sleep(0.05)  # 调整轮询间隔（平衡响应速度与负载）
+
     return Response(event_stream(), mimetype='text/event-stream')
 @app.route('/health-check')
 def health_check():
