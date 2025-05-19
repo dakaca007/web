@@ -45,6 +45,15 @@ COPY /static /var/www/html/php/static
 COPY /myapp /var/www/html/php/myapp
 # 复制Nginx配置文件
 COPY nginx.conf /etc/nginx/sites-available/default
+
+# 在原有Python安装基础上添加Flask和Gunicorn
+RUN python3 -m pip install --no-cache-dir flask gunicorn
+
+# 添加Flask应用目录
+COPY ./flaskapp /var/www/html/flaskapp
+RUN chown -R www-data:www-data /var/www/html/flaskapp \
+    && chmod 755 /var/www/html/flaskapp
+
 # 配置非root用户并生成证书
 RUN useradd -m appuser && \
     # 安装sudo
