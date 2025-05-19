@@ -44,13 +44,13 @@ RUN useradd -m appuser && \
       -keyout /home/appuser/.gotty.key \
       -out /home/appuser/.gotty.crt && \
     chown appuser:appuser /home/appuser/.gotty.*
-
+# 复制启动脚本并设置权限（在切换用户前完成）
+COPY start.sh /start.sh
+RUN chown appuser:appuser /start.sh && chmod +x /start.sh
 USER appuser
 
 
-# 复制启动脚本并设置权限
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
+
 
 
 
