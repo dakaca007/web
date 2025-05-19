@@ -47,8 +47,11 @@ COPY /myapp /var/www/html/php/myapp
 COPY nginx.conf /etc/nginx/sites-available/default
 
 # 在原有Python安装基础上添加Flask和Gunicorn
-RUN python3 -m pip install --no-cache-dir flask gunicorn
-
+#RUN python3 -m pip install --no-cache-dir flask gunicorn
+# 改为安装requirements.txt
+COPY ./flaskapp/requirements.txt /tmp/requirements.txt
+RUN python3 -m pip install --no-cache-dir -r /tmp/requirements.txt && \
+    rm /tmp/requirements.txt
 # 添加Flask应用目录
 COPY ./flaskapp /var/www/html/flaskapp
 RUN chown -R www-data:www-data /var/www/html/flaskapp \
