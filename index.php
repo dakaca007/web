@@ -3,7 +3,7 @@
 <head>
     <title>实时聊天室</title>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         :root {
             --primary-color: #2196F3;
@@ -15,7 +15,7 @@
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0 0 80px; /* 底部留出输入框高度 */
             background-color: var(--background-color);
             color: var(--text-color);
         }
@@ -23,37 +23,37 @@
         .container {
             max-width: 800px;
             margin: 0 auto;
-            background: var(--card-background);
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-        }
-
-        h2 {
-            color: var(--primary-color);
-            margin-top: 0;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 0.5rem;
+            padding: 20px;
         }
 
         #sendForm {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-background);
+            padding: 15px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
             display: flex;
             gap: 10px;
-            margin-bottom: 2rem;
+            z-index: 1000;
         }
 
         #messageInput {
             flex: 1;
-            padding: 12px;
+            padding: 12px 16px;
             border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            border-radius: 25px;
             font-size: 16px;
-            transition: border-color 0.3s ease;
+            transition: all 0.3s ease;
+            min-height: 50px;
+            box-sizing: border-box;
         }
 
         #messageInput:focus {
             outline: none;
             border-color: var(--primary-color);
+            box-shadow: 0 0 8px rgba(33, 150, 243, 0.2);
         }
 
         button[type="submit"] {
@@ -61,63 +61,85 @@
             color: white;
             border: none;
             padding: 12px 24px;
-            border-radius: 8px;
+            border-radius: 25px;
             cursor: pointer;
             font-weight: 600;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
+            min-width: 80px;
+            flex-shrink: 0;
         }
 
         button[type="submit"]:hover {
             background-color: #1976D2;
+            transform: translateY(-1px);
         }
 
         #chatLog {
-            height: 400px;
+            height: calc(100vh - 160px);
             overflow-y: auto;
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 1rem;
-            border: 1px solid #eee;
+            -webkit-overflow-scrolling: touch;
+            padding: 10px 0;
         }
 
         #chatLog p {
-            margin: 0.5rem 0;
-            padding: 10px 16px;
-            background: white;
+            margin: 8px 0;
+            padding: 12px 18px;
+            background: var(--card-background);
             border-radius: 20px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            word-break: break-word;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @media (max-width: 600px) {
+            body {
+                padding-bottom: 70px;
+            }
+
             .container {
-                padding: 1rem;
-                margin: 10px;
+                padding: 10px;
             }
 
             #sendForm {
-                flex-direction: column;
+                padding: 10px;
+                gap: 8px;
+            }
+
+            #messageInput {
+                padding: 10px 14px;
+                font-size: 14px;
+                min-height: 44px;
             }
 
             button[type="submit"] {
-                width: 100%;
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+
+            #chatLog {
+                height: calc(100vh - 140px);
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>📨 发送消息</h2>
-        <form id="sendForm">
-            <input type="text" id="messageInput" placeholder="输入消息内容..." required>
-            <button type="submit">发送</button>
-        </form>
-
         <h2>📜 聊天记录</h2>
         <div id="chatLog"></div>
     </div>
 
+    <form id="sendForm">
+        <input type="text" id="messageInput" placeholder="输入消息内容..." required>
+        <button type="submit">发送</button>
+    </form>
+
     <script>
-        // 原有 JavaScript 代码保持不变
+        // 消息处理逻辑保持不变
         document.getElementById('sendForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const text = document.getElementById('messageInput').value;
@@ -139,8 +161,9 @@
                 try {
                     const data = JSON.parse(event.data);
                     const log = document.getElementById('chatLog');
-                    log.innerHTML = data.map(m => `<p>${m}</p>`).join('');
-                    log.scrollTop = log.scrollHeight;
+                    // 最新消息显示在最前面
+                    log.innerHTML = data.reverse().map(m => `<p>${m}</p>`).join('');
+                    log.scrollTop = 0; // 自动滚动到顶部
                 } catch (err) {
                     console.error("JSON 解析失败:", err);
                 }
@@ -148,7 +171,6 @@
 
             source.onerror = function(err) {
                 if (source.readyState === 2) {
-                    console.log("连接断开，正在尝试重连...");
                     setTimeout(connectSSE, 1000);
                 }
             };
