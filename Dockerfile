@@ -12,7 +12,6 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
     python3-pip \
     openjdk-17-jdk \
     vim \
-    sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 
  # 配置Nginx目录权限（关键步骤）

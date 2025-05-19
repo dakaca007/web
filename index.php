@@ -128,12 +128,6 @@
     </style>
 </head>
 <body>
-	<div id="authBar" style="position: fixed; top: 0; right: 20px; padding: 10px; background: white; z-index: 1000;">
-    <span id="userStatus">未登录</span>
-    <button onclick="showLogin()">登录</button>
-    <button onclick="showRegister()">注册</button>
-    <button onclick="logout()" style="display: none;">退出</button>
-</div>
     <div class="container">
         <h2>📜 聊天记录</h2>
         <div id="chatLog"></div>
@@ -145,38 +139,6 @@
     </form>
 
     <script>
-
-		// 检查登录状态
-function checkAuth() {
-    fetch('/flask/check_auth')
-        .then(r => r.json())
-        .then(data => {
-            if (data.logged_in) {
-                document.getElementById('userStatus').textContent = `已登录：${data.username}`;
-                document.querySelectorAll('button').forEach(b => {
-                    b.style.display = b.textContent === '退出' ? 'inline' : 'none';
-                });
-            }
-        });
-}
-
-// 显示登录弹窗
-function showLogin() {
-    const username = prompt('请输入用户名:');
-    const password = prompt('请输入密码:');
-    fetch('/flask/login', {
-        method: 'POST',
-        body: new URLSearchParams({ username, password })
-    }).then(r => {
-        if(r.ok) {
-            checkAuth();
-            location.reload();
-        }
-    });
-}
-
-
-
         // 消息处理逻辑保持不变
         document.getElementById('sendForm').addEventListener('submit', function(e) {
             e.preventDefault();
