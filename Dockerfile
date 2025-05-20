@@ -36,6 +36,7 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
     php8.1-pdo \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /var/www/html/php
+RUN mkdir -p /var/www/uploads
 # 创建 PHP-FPM 运行时目录
 RUN mkdir -p /run/php && chown www-data:www-data /run/php
 # 创建 PHP 测试文件和目录（添加 index.php）
