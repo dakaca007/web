@@ -144,7 +144,14 @@
                 height: calc(100vh - 140px);
             }
         }
-
+.message-item {
+    position: relative;
+}
+.mention {
+    background-color: #fff3d6;
+    border-left: 3px solid #ffd54f;
+    padding-left: 8px;
+}
     </style>
 </head>
 <body>
@@ -187,7 +194,49 @@
         <h2>📜 聊天记录</h2>
         <div id="chatLog"></div>
     </div>
+<div id="fileUpload">
+    <input type="file" id="fileInput" hidden>
+    <button onclick="document.getElementById('fileInput').click()">上传文件</button>
+    <div id="preview"></div>
+</div>
 
+<script>
+// 文件上传处理
+document.getElementById('fileInput').addEventListener('change', async function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+        const response = await fetch('/flask/upload', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+        
+        if (data.url) {
+            // 显示预览
+            if (file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = data.url;
+                img.style.maxWidth = '200px';
+                document.getElementById('preview').appendChild(img);
+            }
+            // 自动发送文件消息
+            sendMessage(`[文件] ${file.name} ${data.url}`);
+        }
+    } catch (err) {
+        console.error('上传失败:', err);
+    }
+});
+
+function sendMessage(text) {
+    document.getElementById('messageInput').value = text;
+    document.querySelector('button[type="submit"]').click();
+}
+</script>
     <form id="sendForm">
         <input type="text" id="messageInput" placeholder="输入消息内容..." required>
         <button type="submit">发送</button>

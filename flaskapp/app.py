@@ -4,6 +4,9 @@ import requests
 import pymysql.cursors
 from flask import Flask, jsonify, request, Response
 import threading
+mport os
+import uuid
+from werkzeug.utils import secure_filename
 app = Flask(__name__)
 def keep_alive():
     while True:
@@ -23,6 +26,52 @@ db_conf = {
 
 def get_db():
     return pymysql.connect(**db_conf)
+UPLOAD_FOLDER = '/var/www/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'docx'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    # 实际应验证用户身份
+    user_id = 1  
+    
+    if 'file' not in request.files:
+        return jsonify(error="No file part"), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify(error="No selected file"), 400
+    
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        unique_name = f"{uuid.uuid4()}_{filename}"
+        save_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
+        file.save(save_path)
+        
+        # 记录到数据库
+        db = get_db()
+        try:
+            with db.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO uploaded_files 
+                    (user_id, filename, filepath, filetype)
+                    VALUES (%s, %s, %s, %s)
+                """, (user_id, filename, unique_name, file.content_type))
+                db.commit()
+            return jsonify(url=f"/download/{unique_name}")
+        finally:
+            db.close()
+    
+    return jsonify(error="File type not allowed"), 400
+
+@app.route('/download/<filename>')
+def download_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 @app.route('/send', methods=['POST'])
 def send():
     db = get_db()
@@ -30,12 +79,22 @@ def send():
         with db.cursor() as cursor:
             content = request.form.get('text')
             # 实际应用中需要验证用户身份
-            cursor.execute("INSERT INTO messages (user_id, content) VALUES (1, %s)", (content,))
+            #cursor.execute("INSERT INTO messages (user_id, content) VALUES (1, %s)", (content,))
+            mentioned = extract_mentions(content)  # 新增解析函数
+    
+            cursor.execute("""
+                INSERT INTO messages 
+                (user_id, content, mentioned_users) 
+                VALUES (1, %s, %s)
+            """, (content, json.dumps(mentioned)))
             db.commit()
         return jsonify(ok=1)
     finally:
         db.close()
-
+def extract_mentions(text):
+    import re
+    matches = re.findall(r'@(\w+)', text)
+    return matches
 @app.route('/sse')
 def sse():
     def event_stream():
@@ -51,13 +110,16 @@ def sse():
                     )
                     messages = cursor.fetchall()
                     
+                    # 在event_stream函数内添加：
                     if messages:
-                        last_id = messages[-1]['id']  # 更新为最新消息的 ID
-                        data = json.dumps([msg['content'] for msg in messages])
-                        yield f"data: {data}\n\n"
-                    else:
-                        # 发送心跳保持连接，避免超时
-                        yield ":keep-alive\n\n"
+                        for msg in messages:
+                            if msg['mentioned_users']:
+                                notification = {
+                                    'type': 'mention',
+                                    'message_id': msg['id'],
+                                    'content': msg['content']
+                                }
+                                yield f"data: {json.dumps(notification)}\n\n"
             except Exception as e:
                 print(f"SSE Error: {e}")
                 time.sleep(1)  # 出错时稍作等待
