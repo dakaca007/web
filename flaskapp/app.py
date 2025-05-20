@@ -69,6 +69,34 @@ def sse():
             time.sleep(0.05)  # 调整轮询间隔（平衡响应速度与负载）
 
     return Response(event_stream(), mimetype='text/event-stream')
+@app.route('/history')
+def get_history():
+    last_id = request.args.get('last_id', 0, type=int)
+    limit = 20
+    
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            cursor.execute("""
+                SELECT m.id, m.content, u.username, m.created_at 
+                FROM messages m
+                JOIN users u ON m.user_id = u.id
+                WHERE m.id < %s
+                ORDER BY m.id DESC 
+                LIMIT %s
+            """, (last_id, limit))
+            messages = cursor.fetchall()
+            
+            # 将时间转换为前端友好格式
+            for msg in messages:
+                msg['created_at'] = msg['created_at'].isoformat()
+            
+            return jsonify({
+                'messages': messages,
+                'has_more': len(messages) == limit
+            })
+    finally:
+        db.close()
 @app.route('/health-check')
 def health_check():
     return {"status": "healthy"}, 200
@@ -79,6 +107,38 @@ def hello():
 @app.route('/api')
 def api():
     return {"status": "success", "message": "Flask API Working"}
+# 在现有路由后添加
+@app.route('/update-activity', methods=['POST'])
+def update_activity():
+    # 实际应用中需要验证用户身份
+    user_id = 1  # 示例用户ID，应根据实际情况获取
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO user_activity (user_id, last_active)
+                VALUES (%s, NOW())
+                ON DUPLICATE KEY UPDATE last_active = NOW()
+            """, (user_id,))
+            db.commit()
+        return jsonify(ok=1)
+    finally:
+        db.close()
 
+@app.route('/active-users')
+def get_active_users():
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            cursor.execute("""
+                SELECT u.username 
+                FROM user_activity ua
+                JOIN users u ON ua.user_id = u.id
+                WHERE ua.last_active > NOW() - INTERVAL 5 MINUTE
+            """)
+            users = [row['username'] for row in cursor.fetchall()]
+            return jsonify(users)
+    finally:
+        db.close()
 if __name__ == '__main__':
     threading.Thread(target=keep_alive, daemon=True).start()

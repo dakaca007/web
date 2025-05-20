@@ -148,6 +148,19 @@
     </style>
 </head>
 <body>
+    <div id="onlineStatus" style="
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+">
+    <h3>在线用户 (<span id="onlineCount">0</span>)</h3>
+    <ul id="onlineList"></ul>
+</div>
 	<div class="auth-box" id="authBox">
     <div id="loginForm" class="auth-form">
         <h2>用户登录</h2>
@@ -265,6 +278,71 @@
         }
 
         connectSSE();
+
+
+        let loading = false;
+let hasMore = true;
+let oldestId = Infinity;
+
+// 初始化加载历史消息
+loadHistory();
+
+// 滚动事件监听
+document.getElementById('chatLog').addEventListener('scroll', function() {
+    if (this.scrollTop === 0 && !loading && hasMore) {
+        loadHistory();
+    }
+});
+
+async function loadHistory() {
+    loading = true;
+    try {
+        const response = await fetch(`/flask/history?last_id=${oldestId}`);
+        const data = await response.json();
+        
+        if (data.messages.length > 0) {
+            const container = document.getElementById('chatLog');
+            const scrollHeight = container.scrollHeight;
+            const scrollTop = container.scrollTop;
+            
+            data.messages.reverse().forEach(msg => {
+                const html = `<p class="message-item" data-id="${msg.id}">
+                    <strong>${msg.username}</strong>
+                    <span>${msg.content}</span>
+                    <small>${new Date(msg.created_at).toLocaleString()}</small>
+                </p>`;
+                container.insertAdjacentHTML('afterbegin', html);
+                oldestId = Math.min(oldestId, msg.id);
+            });
+
+            // 保持滚动位置
+            container.scrollTop = container.scrollHeight - scrollHeight + scrollTop;
+        }
+        hasMore = data.has_more;
+    } finally {
+        loading = false;
+    }
+}
+
+// 定期更新活动状态
+setInterval(() => {
+    fetch('/flask/update-activity', { method: 'POST' });
+    updateOnlineList();
+}, 30000);
+
+// 初始加载和定期刷新
+async function updateOnlineList() {
+    const response = await fetch('/flask/active-users');
+    const users = await response.json();
+    
+    const list = document.getElementById('onlineList');
+    list.innerHTML = users.map(u => `<li>${u}</li>`).join('');
+    document.getElementById('onlineCount').textContent = users.length;
+}
+
+// 初始加载
+updateOnlineList();
+setInterval(updateOnlineList, 10000);
     </script>
 </body>
 </html>
