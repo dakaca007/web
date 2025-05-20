@@ -48,7 +48,7 @@ COPY index.php /var/www/html/php
 COPY db_connect.php /var/www/html/php
 COPY login.php /var/www/html/php
 COPY register.php /var/www/html/php
-COPY /static /var/www/html/php/static
+
 # 复制Nginx配置文件
 COPY nginx.conf /etc/nginx/sites-available/default
 
