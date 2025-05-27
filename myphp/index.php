@@ -10,8 +10,9 @@
     <button onclick="sendMessage()">Send</button>
 
     <script>
-        const socket = io.connect('https://' + document.domain + '/' + 'flask');
-
+        const socket = io.connect('https://' + document.domain, {
+    path: '/flask/socket.io'  // 根据服务端路由调整
+});
         // 监听服务端消息
         socket.on('server_response', function(data) {
             const div = document.createElement('div');
