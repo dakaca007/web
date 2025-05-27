@@ -39,7 +39,7 @@
         overscroll-behavior: contain;
     }
     
-    .message {
+    .message img {
         margin: 10px 0;
         padding: 12px;
         border-radius: 15px;
@@ -133,7 +133,7 @@
             padding: 6px 10px;
         }
         
-        .message {
+        .message img {
             font-size: 15px;
             max-width: 90%;
             padding: 10px;
@@ -183,6 +183,8 @@
     <div class="chat-container">
         <div id="messages"></div>
         <div class="input-group">
+            <input type="file" id="fileInput" style="display: none;" accept="image/*">
+    <button onclick="document.getElementById('fileInput').click()">图片</button>
             <input type="text" id="messageInput" placeholder="输入消息...">
             <button onclick="sendMessage()">发送</button>
         </div>
@@ -228,7 +230,14 @@
                             <div>${data.content}</div>
                         </div>
                     `;
-                
+                case 'image':
+            return `
+                <div class="message ${isSelf ? 'self' : ''}">
+                    <strong>${data.nickname}</strong>
+                    <span class="timestamp">${timeString}</span>
+                    <img src="${data.content}" style="max-width: 300px; border-radius: 8px; margin-top: 8px;">
+                </div>
+            `;
                 case 'notification':
                 case 'system':
                     return `
@@ -282,6 +291,36 @@
                 container.scrollTop = container.scrollHeight;
             }, 300);
         });
+
+
+        // 添加文件上传处理
+document.getElementById('fileInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const response = await fetch('/upload', {
+            method: 'POST',
+            body: formData
+        });
+        const result = await response.json();
+        
+        if (result.url) {
+            socket.emit('client_message', {
+                type: 'image',
+                content: result.url
+            });
+        } else {
+            alert(result.error || '上传失败');
+        }
+    } catch (err) {
+        console.error('上传错误:', err);
+    }
+    e.target.value = ''; // 清除选择
+});
     </script>
      
 </body>

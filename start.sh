@@ -11,3 +11,5 @@ su - root -c "gotty --permit-write --port 3000 bash" &
 
 # 前台运行Nginx
 nginx -g "daemon off;"
+mkdir -p static/uploads
+chmod 755 static/uploads
