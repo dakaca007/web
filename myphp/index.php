@@ -302,7 +302,7 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
     formData.append('file', file);
 
     try {
-        const response = await fetch('/upload', {
+        const response = await fetch('https://bm-p8ho.onrender.com/flask/upload', {
             method: 'POST',
             body: formData
         });
