@@ -191,5 +191,205 @@
             }
         });
     </script>
+    <div class="action-buttons">
+    <input type="file" id="fileInput" hidden accept="image/*,video/*,audio/*">
+    <button onclick="openFilePicker()">📎</button>
+    <button id="recordButton" onclick="toggleRecording()">🎤</button>
+</div>
+
+<!-- 在样式部分添加 -->
+<style>
+    .action-buttons {
+        position: fixed;
+        bottom: 80px;
+        right: 20px;
+        display: flex;
+        gap: 10px;
+    }
+    .action-buttons button {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        padding: 0;
+        min-width: auto;
+    }
+    .media-preview {
+        max-width: 200px;
+        margin: 5px 0;
+    }
+    video.media-preview {
+        width: 100%;
+        height: auto;
+    }
+    .audio-message {
+        display: flex;
+        align-items: center;
+    }
+    .audio-message audio {
+        flex: 1;
+    }
+</style>
+
+<script>
+// 添加媒体处理功能
+let mediaRecorder;
+let audioChunks = [];
+
+// 文件上传
+function openFilePicker() {
+    document.getElementById('fileInput').click();
+}
+
+document.getElementById('fileInput').addEventListener('change', async function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // 预览
+    const preview = await createPreview(file);
+    if (preview) {
+        const container = document.getElementById('messages');
+        container.appendChild(preview);
+    }
+    
+    // 上传
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+        const response = await fetch('/upload', {
+            method: 'POST',
+            body: formData
+        });
+        const result = await response.json();
+        
+        if (result.url) {
+            const type = file.type.split('/')[0];
+            socket.emit('client_message', {
+                type: type === 'audio' ? 'audio' : type,
+                content: result.url
+            });
+        }
+    } catch (error) {
+        console.error('Upload failed:', error);
+    }
+});
+
+// 创建预览
+async function createPreview(file) {
+    const div = document.createElement('div');
+    
+    if (file.type.startsWith('image/')) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.className = 'media-preview';
+        div.appendChild(img);
+        return div;
+    }
+    
+    if (file.type.startsWith('video/')) {
+        const video = document.createElement('video');
+        video.controls = true;
+        video.className = 'media-preview';
+        video.src = URL.createObjectURL(file);
+        div.appendChild(video);
+        return div;
+    }
+    
+    if (file.type.startsWith('audio/')) {
+        const audio = document.createElement('audio');
+        audio.controls = true;
+        audio.src = URL.createObjectURL(file);
+        div.appendChild(audio);
+        return div;
+    }
+    
+    return null;
+}
+
+// 语音录制功能
+async function toggleRecording() {
+    if (!mediaRecorder) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        
+        mediaRecorder.ondataavailable = e => {
+            audioChunks.push(e.data);
+        };
+        
+        mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            audioChunks = [];
+            
+            // 创建预览并上传
+            const preview = await createPreview(new File([audioBlob], 'recording.webm'));
+            document.getElementById('messages').appendChild(preview);
+            
+            const formData = new FormData();
+            formData.append('file', audioBlob, 'recording.webm');
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                
+                if (result.url) {
+                    socket.emit('client_message', {
+                        type: 'audio',
+                        content: result.url
+                    });
+                }
+            } catch (error) {
+                console.error('Upload failed:', error);
+            }
+        };
+        
+        mediaRecorder.start();
+        document.getElementById('recordButton').textContent = '⏹️';
+    } else {
+        mediaRecorder.stop();
+        mediaRecorder = null;
+        document.getElementById('recordButton').textContent = '🎤';
+    }
+}
+
+// 修改消息格式化函数
+function formatMessage(data) {
+    // 原有逻辑基础上增加媒体处理
+    case 'image':
+        return `
+            <div class="message ${isSelf ? 'self' : ''}">
+                <strong>${data.nickname}</strong>
+                <span class="timestamp">${timeString}</span>
+                <img src="${data.content}" class="media-preview">
+            </div>
+        `;
+    
+    case 'video':
+        return `
+            <div class="message ${isSelf ? 'self' : ''}">
+                <strong>${data.nickname}</strong>
+                <span class="timestamp">${timeString}</span>
+                <video controls class="media-preview">
+                    <source src="${data.content}" type="video/mp4">
+                </video>
+            </div>
+        `;
+    
+    case 'audio':
+        return `
+            <div class="message ${isSelf ? 'self' : ''}">
+                <strong>${data.nickname}</strong>
+                <span class="timestamp">${timeString}</span>
+                <div class="audio-message">
+                    <audio controls>
+                        <source src="${data.content}" type="audio/webm">
+                    </audio>
+                </div>
+            </div>
+        `;
+}
+</script>
 </body>
 </html>
