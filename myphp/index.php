@@ -4,70 +4,106 @@
     <title>实时聊天室</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f0f2f5;
-        }
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 10px;
+        background-color: #f0f2f5;
+        height: 100vh;
+    }
+    .chat-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 10px;
+        height: calc(100vh - 20px); /* 全屏高度 */
+        display: flex;
+        flex-direction: column;
+    }
+    #messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 5px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        -webkit-overflow-scrolling: touch; /* 移动端滚动优化 */
+    }
+    .message {
+        margin: 8px 0;
+        padding: 8px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        font-size: 14px;
+        word-break: break-word; /* 长文本换行 */
+    }
+    .message.self {
+        background: #007bff;
+        color: white;
+    }
+    .notification {
+        color: #4a5568;
+        font-size: 12px;
+        text-align: center;
+        margin: 8px 0;
+        padding: 5px;
+    }
+    .input-group {
+        display: flex;
+        gap: 8px;
+        padding-top: 10px;
+    }
+    input[type="text"] {
+        flex: 1;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 25px;
+        font-size: 16px; /* 加大输入字体 */
+    }
+    button {
+        padding: 12px 20px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 16px; /* 按钮字体加大 */
+        min-width: 80px; /* 保证按钮宽度 */
+    }
+    .timestamp {
+        font-size: 10px;
+        color: rgba(255,255,255,0.8);
+        margin-left: 8px;
+    }
+    
+    /* 手机横屏适配 */
+    @media screen and (orientation: landscape) {
         .chat-container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 20px;
+            height: calc(100vh - 20px);
         }
         #messages {
-            height: 60vh;
-            overflow-y: auto;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            max-height: 50vh;
         }
-        .message {
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 5px;
-            background: #f8f9fa;
-        }
-        .message.self {
-            background: #007bff;
-            color: white;
-        }
-        .notification {
-            color: #6c757d;
-            font-size: 0.9em;
-            text-align: center;
-            margin: 10px 0;
-        }
-        .input-group {
-            display: flex;
-            gap: 10px;
-        }
+    }
+    
+    /* 小屏幕手机优化 */
+    @media (max-width: 375px) {
         input[type="text"] {
-            flex: 1;
             padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            font-size: 14px;
         }
         button {
-            padding: 10px 20px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            padding: 10px 15px;
+            min-width: 70px;
         }
-        button:hover {
-            background: #0056b3;
-        }
-        .timestamp {
-            font-size: 0.8em;
-            color: #666;
-            margin-left: 10px;
-        }
-    </style>
+    }
+    
+    /* 点击反馈 */
+    button:active {
+        background: #0056b3;
+        transform: scale(0.98);
+    }
+</style>
 </head>
 <body>
     <div class="chat-container">
