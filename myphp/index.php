@@ -1,108 +1,181 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>实时聊天室</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <style>
+    :root {
+        --input-height: 46px;
+    }
+
     body {
-        font-family: Arial, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
         margin: 0;
-        padding: 10px;
+        padding: 0;
         background-color: #f0f2f5;
         height: 100vh;
+        -webkit-tap-highlight-color: transparent;
     }
+    
     .chat-container {
         background: white;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        padding: 10px;
-        height: calc(100vh - 20px); /* 全屏高度 */
+        height: 100vh;
         display: flex;
         flex-direction: column;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
     }
+    
     #messages {
         flex: 1;
         overflow-y: auto;
-        padding: 5px;
-        margin-bottom: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        -webkit-overflow-scrolling: touch; /* 移动端滚动优化 */
+        padding: 8px 12px;
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+        overscroll-behavior: contain;
     }
+    
     .message {
-        margin: 8px 0;
-        padding: 8px;
-        border-radius: 8px;
+        margin: 10px 0;
+        padding: 12px;
+        border-radius: 15px;
         background: #f8f9fa;
-        font-size: 14px;
-        word-break: break-word; /* 长文本换行 */
+        font-size: 16px;
+        line-height: 1.4;
+        max-width: 85%;
+        position: relative;
+        word-break: break-word;
+        animation: messageAppear 0.3s ease-out;
     }
+    
     .message.self {
         background: #007bff;
         color: white;
+        margin-left: auto;
     }
+    
     .notification {
-        color: #4a5568;
+        color: #666;
         font-size: 12px;
         text-align: center;
-        margin: 8px 0;
-        padding: 5px;
+        margin: 12px 0;
+        padding: 6px;
+        background: rgba(0,0,0,0.05);
+        border-radius: 20px;
     }
+    
     .input-group {
         display: flex;
         gap: 8px;
-        padding-top: 10px;
+        padding: 12px;
+        background: #f8f9fa;
+        border-top: 1px solid #eee;
+        box-shadow: 0 -2px 8px rgba(0,0,0,0.03);
     }
+    
     input[type="text"] {
         flex: 1;
-        padding: 12px;
+        padding: 10px 16px;
         border: 1px solid #ddd;
         border-radius: 25px;
-        font-size: 16px; /* 加大输入字体 */
+        font-size: 16px;
+        min-height: var(--input-height);
+        background: white;
+        outline: none;
     }
+    
+    input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+    }
+    
     button {
-        padding: 12px 20px;
+        padding: 0 20px;
         background: #007bff;
         color: white;
         border: none;
         border-radius: 25px;
-        cursor: pointer;
-        font-size: 16px; /* 按钮字体加大 */
-        min-width: 80px; /* 保证按钮宽度 */
+        font-size: 16px;
+        min-width: 80px;
+        height: var(--input-height);
+        transition: all 0.2s;
     }
+    
     .timestamp {
-        font-size: 10px;
-        color: rgba(255,255,255,0.8);
-        margin-left: 8px;
+        display: block;
+        font-size: 12px;
+        color: rgba(255,255,255,0.9);
+        margin-top: 6px;
+        opacity: 0.8;
     }
     
-    /* 手机横屏适配 */
-    @media screen and (orientation: landscape) {
-        .chat-container {
-            height: calc(100vh - 20px);
+    .message:not(.self) .timestamp {
+        color: rgba(0,0,0,0.6);
+    }
+
+    @keyframes messageAppear {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
         }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 480px) {
         #messages {
-            max-height: 50vh;
+            padding: 6px 10px;
+        }
+        
+        .message {
+            font-size: 15px;
+            max-width: 90%;
+            padding: 10px;
+        }
+        
+        input[type="text"] {
+            font-size: 15px;
+            padding: 8px 14px;
+        }
+        
+        button {
+            min-width: 70px;
+            padding: 0 16px;
+        }
+    }
+
+    @media (max-width: 375px) {
+        :root {
+            --input-height: 44px;
+        }
+        
+        button {
+            font-size: 15px;
+            min-width: 64px;
         }
     }
     
-    /* 小屏幕手机优化 */
-    @media (max-width: 375px) {
+    @media (max-width: 320px) {
+        .input-group {
+            padding: 8px;
+        }
+        
         input[type="text"] {
-            padding: 10px;
             font-size: 14px;
         }
-        button {
-            padding: 10px 15px;
-            min-width: 70px;
-        }
     }
-    
-    /* 点击反馈 */
-    button:active {
-        background: #0056b3;
-        transform: scale(0.98);
+
+    /* 适配虚拟键盘 */
+    @media (max-height: 420px) {
+        .chat-container {
+            height: 100%;
+        }
     }
 </style>
 </head>
@@ -190,6 +263,24 @@
             if(e.key === 'Enter') {
                 sendMessage();
             }
+        });
+
+
+        // 添加视口高度动态调整
+        function adjustHeight() {
+            const container = document.querySelector('.chat-container');
+            container.style.height = window.innerHeight + 'px';
+        }
+        
+        window.addEventListener('resize', adjustHeight);
+        adjustHeight();
+
+        // 输入框获取焦点时自动滚动到底部
+        document.getElementById('messageInput').addEventListener('focus', () => {
+            setTimeout(() => {
+                const container = document.getElementById('messages');
+                container.scrollTop = container.scrollHeight;
+            }, 300);
         });
     </script>
      
