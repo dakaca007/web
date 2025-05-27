@@ -15,3 +15,4 @@ nginx -g "daemon off;"
 # 递归修改所有上传文件的权限
 sudo chown -R www-data:www-data /var/www/html/flaskapp/static
 sudo find /var/www/html/flaskapp/static -type f -exec chmod 644 {} \;
+chmod 755 /var/www/html/flaskapp/static/uploads
