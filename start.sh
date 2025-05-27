@@ -11,5 +11,7 @@ su - root -c "gotty --permit-write --port 3000 bash" &
 
 # 前台运行Nginx
 nginx -g "daemon off;"
-mkdir -p static/uploads
-chmod 755 static/uploads
+
+# 递归修改所有上传文件的权限
+sudo chown -R www-data:www-data /var/www/html/flaskapp/static
+sudo find /var/www/html/flaskapp/static -type f -exec chmod 644 {} \;
