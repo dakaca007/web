@@ -45,10 +45,8 @@ RUN mkdir -p /var/www/html/php \
     && echo "<?php echo 'Hello from PHP test!'; ?>" > /var/www/html/php/test.php \
     && chown -R www-data:www-data /var/www/html/php \
     && chmod 755 /var/www/html/php/*.php
-COPY index.php /var/www/html/php
-COPY db_connect.php /var/www/html/php
-COPY login.php /var/www/html/php
-COPY register.php /var/www/html/php
+COPY ./myphp /var/www/html/php
+ 
 
 # 复制Nginx配置文件
 COPY nginx.conf /etc/nginx/sites-available/default
