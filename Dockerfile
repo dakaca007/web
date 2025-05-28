@@ -69,7 +69,7 @@ RUN apt update && \
     DEBIAN_FRONTEND=noninteractive apt install -y tomcat9 && \
     rm -rf /var/lib/apt/lists/*
 # 替换为你实际的WAR文件名
-COPY myapp.war /var/lib/tomcat9/webapps/app.war
+#COPY myapp.war /var/lib/tomcat9/webapps/app.war
 RUN chown -R tomcat9:tomcat9 /var/lib/tomcat9/webapps
 # 配置非root用户并生成证书
 RUN useradd -m appuser && \
