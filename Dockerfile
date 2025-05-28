@@ -64,6 +64,13 @@ RUN mkdir -p /var/www/html/flaskapp/static/uploads \
 RUN chown -R www-data:www-data /var/www/html/flaskapp \
     && chmod 755 /var/www/html/flaskapp
 
+    # 安装Tomcat 9
+RUN apt update && \
+    DEBIAN_FRONTEND=noninteractive apt install -y tomcat9 && \
+    rm -rf /var/lib/apt/lists/*
+# 替换为你实际的WAR文件名
+COPY myapp.war /var/lib/tomcat9/webapps/app.war
+RUN chown -R tomcat9:tomcat9 /var/lib/tomcat9/webapps
 # 配置非root用户并生成证书
 RUN useradd -m appuser && \
     # 安装sudo

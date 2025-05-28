@@ -1,5 +1,7 @@
 #!/bin/bash
 export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+# 启动Tomcat服务
+service tomcat9 start
 # 启动php-fpm服务
 service php8.1-fpm start
 # 启动Flask应用（使用gunicorn）
