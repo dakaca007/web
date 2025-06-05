@@ -193,7 +193,7 @@
 
     <script>
         let nickname = null;
-        const socket = io.connect('https://' + document.domain, {
+        const socket = io.connect('http://' + document.domain, {
             path: '/flask/socket.io'
         });
 
@@ -303,7 +303,7 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
     formData.append('file', file);
 
     try {
-        const response = await fetch('https://bm-p8ho.onrender.com/flask/upload', {
+        const response = await fetch('http://dakaca.com/flask/upload', {
             method: 'POST',
             body: formData
         });
