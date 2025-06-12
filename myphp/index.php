@@ -104,7 +104,7 @@
       }
     }
 
-    async function loadNextVideo() {
+  async function loadNextVideo() {
   loadingEl.textContent = '正在加载视频...';
 
   try {
@@ -121,7 +121,11 @@
     // 更新播放器
     player.src = url;
     await player.load();
-    await player.play();
+    player.play().catch((err) => {
+      console.error('自动播放失败', err);
+      // 如果自动播放失败,则手动触发 'ended' 事件
+      player.dispatchEvent(new Event('ended'));
+    });
     loadingEl.textContent = '';
 
     // 保存历史
@@ -160,6 +164,7 @@
     setTimeout(retryLoadNextVideo, retryDelay);
   }
 }
+
 
     // 事件绑定
     player.addEventListener('ended', loadNextVideo);
