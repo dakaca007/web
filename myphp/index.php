@@ -104,40 +104,62 @@
       }
     }
 
-    // 加载并播放一条新视频
     async function loadNextVideo() {
-      loadingEl.textContent = '正在加载视频…';
-      try {
-        const resp = await fetch(apiEndpoint);
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const data = await resp.json();
-        if (data.code !== 200 || !data.mp4_video) {
-          throw new Error(data.msg || '返回数据不包含视频链接');
-        }
-        const url = data.mp4_video;
+  loadingEl.textContent = '正在加载视频...';
 
-        // 更新播放器
-        player.src = url;
-        await player.load();
-        await player.play();
-        loadingEl.textContent = '';
+  try {
+    const resp = await fetch(apiEndpoint);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
 
-        // 保存历史
-        const history = loadHistory();
-        history.unshift({ url, time: Date.now() });
-        // 最多保留 MAX_HISTORY 条
-        if (history.length > MAX_HISTORY) history.pop();
-        saveHistory(history);
-        renderHistory();
-
-        // 自动下载
-        downloadVideo(url);
-      } catch (err) {
-        console.error('加载视频失败', err);
-        loadingEl.textContent = '视频加载失败，请稍后重试';
-        setTimeout(loadNextVideo, 100); // 尝试下一个视频
-      }
+    if (data.code !== 200 || !data.mp4_video) {
+      throw new Error(data.msg || '返回数据不包含视频链接');
     }
+
+    const url = data.mp4_video;
+
+    // 更新播放器
+    player.src = url;
+    await player.load();
+    await player.play();
+    loadingEl.textContent = '';
+
+    // 保存历史
+    const history = loadHistory();
+    history.unshift({ url, time: Date.now() });
+    if (history.length > MAX_HISTORY) history.pop();
+    saveHistory(history);
+    renderHistory();
+
+    // 自动下载
+    downloadVideo(url);
+  } catch (err) {
+    console.error('加载视频失败', err);
+    loadingEl.textContent = '视频加载失败,正在尝试下一个视频...';
+
+    // 尝试加载下一个视频,但最多尝试 3 次
+    let retryCount = 0;
+    const maxRetries = 3;
+    const retryDelay = 1000; // 1 秒
+
+    const retryLoadNextVideo = async () => {
+      if (retryCount < maxRetries) {
+        retryCount++;
+        try {
+          await loadNextVideo();
+        } catch (retryErr) {
+          console.error('重试加载视频失败', retryErr);
+          loadingEl.textContent = '视频加载失败,正在尝试下一个视频...';
+          setTimeout(retryLoadNextVideo, retryDelay);
+        }
+      } else {
+        loadingEl.textContent = '无法加载任何视频,请稍后重试';
+      }
+    };
+
+    setTimeout(retryLoadNextVideo, retryDelay);
+  }
+}
 
     // 事件绑定
     player.addEventListener('ended', loadNextVideo);
