@@ -140,7 +140,7 @@ async function loadNextVideo() {
     // 尝试加载下一个视频,但最多尝试 3 次
     let retryCount = 0;
     const maxRetries = 3;
-    const retryDelay = 1000; // 1 秒
+    const retryDelay = 5000; // 1 秒
 
     const retryLoadNextVideo = async () => {
       if (retryCount < maxRetries) {
