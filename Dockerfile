@@ -36,7 +36,7 @@ COPY nginx.conf /etc/nginx/sites-available/default
 
 # 配置启动脚本
 COPY start.sh /start.sh
-
+RUN chmod +x /start.sh
 
 # 暴露端口
 EXPOSE 80
