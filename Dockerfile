@@ -6,13 +6,8 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list && 
 
 # 安装基础依赖
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
-    curl \
     bash \
-    procps \
-    ncurses-bin \
-    openssl \
     nginx \
-    vim \
     && rm -rf /var/lib/apt/lists/*
 
 # 配置Nginx目录权限
@@ -23,9 +18,6 @@ RUN mkdir -p /var/log/nginx /var/lib/nginx /var/www/html/php \
 # 安装PHP-FPM及相关扩展
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
     php8.1-fpm \
-    php8.1-mysql \
-    php8.1-odbc \
-    php8.1-pdo \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /var/www/html/php
