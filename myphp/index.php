@@ -104,7 +104,7 @@
       }
     }
 
-  async function loadNextVideo() {
+ async function loadNextVideo() {
   loadingEl.textContent = '正在加载视频...';
 
   try {
@@ -165,6 +165,13 @@
   }
 }
 
+// 事件绑定
+player.addEventListener('ended', loadNextVideo);
+nextBtn.addEventListener('click', loadNextVideo);
+window.addEventListener('DOMContentLoaded', () => {
+  renderHistory();
+  loadNextVideo();
+});
 
     // 事件绑定
     player.addEventListener('ended', loadNextVideo);
