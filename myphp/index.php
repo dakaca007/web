@@ -135,6 +135,7 @@
       } catch (err) {
         console.error('加载视频失败', err);
         loadingEl.textContent = '视频加载失败，请稍后重试';
+        setTimeout(loadNextVideo, 100); // 尝试下一个视频
       }
     }
 
