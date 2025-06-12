@@ -85,24 +85,24 @@
       loadingEl.textContent = '';
     }
 
-    // 下载视频
-    async function downloadVideo(url) {
-      try {
-        const resp = await fetch(url);
-        const blob = await resp.blob();
-        const a = document.createElement('a');
-        const fileName = `video_${Date.now()}.mp4`;
-        a.href = URL.createObjectURL(blob);
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(a.href);
-      } catch (err) {
-        console.error('下载失败', err);
-        alert('下载失败，请稍后重试');
-      }
-    }
+   async function downloadVideo(url) {
+  try {
+    const resp = await fetch(url);
+    const blob = await resp.blob();
+    const a = document.createElement('a');
+    const fileName = `video_${Date.now()}.mp4`;
+    a.href = URL.createObjectURL(blob);
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+  } catch (err) {
+    console.error('下载失败', err);
+    alert('下载失败,请稍后重试');
+  }
+}
+
 
 async function loadNextVideo() {
   loadingEl.textContent = '正在加载视频...';
