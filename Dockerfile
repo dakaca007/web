@@ -15,9 +15,15 @@ RUN mkdir -p /var/log/nginx /var/lib/nginx /var/www/html/php \
     && chown -R www-data:www-data /var/log/nginx /var/lib/nginx /var/www/html \
     && chmod 755 /var/log/nginx /var/lib/nginx
 
-# 安装PHP-FPM及相关扩展
+# 安装PHP-FPM及相关扩展(添加MySQL扩展)
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
     php8.1-fpm \
+    php8.1-mysql \
+    && rm -rf /var/lib/apt/lists/*
+
+# 安装MySQL服务器
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
+    mysql-server \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /var/www/html/php
@@ -33,13 +39,15 @@ COPY ./myphp /var/www/html/php
 # 配置Nginx
 COPY nginx.conf /etc/nginx/sites-available/default
 
+# MySQL初始化脚本
+COPY init_db.sql /docker-entrypoint-initdb.d/
 
 # 配置启动脚本
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
 # 暴露端口
-EXPOSE 80
+EXPOSE 80 3306
 
 # 启动服务
 CMD ["/start.sh"]
