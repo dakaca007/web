@@ -11,6 +11,11 @@ services:
     depends_on:
       - db
     restart: unless-stopped
+    environment:
+      - DB_HOST=db
+      - DB_NAME=myapp
+      - DB_USER=myuser
+      - DB_PASS=mypassword
 
   db:
     image: mysql:8.0
